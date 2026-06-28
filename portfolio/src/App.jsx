@@ -1,0 +1,1253 @@
+import React from "react";
+import { motion, AnimatePresence, useScroll, useSpring } from "framer-motion";
+import {
+  FaHome,
+  FaBook,
+  FaGithub,
+  FaLinkedin,
+  FaTwitter,
+  FaYoutube,
+  FaSun,
+  FaMoon,
+  FaReact,
+  FaHtml5,
+  FaCss3Alt,
+  FaNodeJs,
+  FaPython,
+  FaGitAlt,
+  FaDatabase,
+  FaServer,
+  FaArrowRight,
+  FaCloudUploadAlt,
+  FaShieldAlt,
+  FaLaptopCode,
+  FaRocket,
+  FaBug,
+  FaCode,
+  FaPenNib,
+  FaLightbulb,
+} from "react-icons/fa";
+import {
+  SiAegisauthenticator,
+  SiAuth0,
+  SiAxios,
+  SiExpress,
+  SiFigma,
+  SiFirebase,
+  SiFramer,
+  SiGit,
+  SiGithub,
+  SiJavascript,
+  SiMongodb,
+  SiMysql,
+  SiPostman,
+  SiReactrouter,
+  SiRedux,
+  SiRender,
+  SiSecurityscorecard,
+  SiSocketdotio,
+  SiSpringsecurity,
+  SiTailwindcss,
+  SiVercel,
+  SiVisualparadigm,
+} from "react-icons/si";
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 16 },
+  show: (i = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, delay: i * 0.05, ease: "easeOut" },
+  }),
+};
+
+function ScrollProgress() {
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, { stiffness: 200, damping: 30 });
+  return (
+    <motion.div
+      style={{ scaleX }}
+      className="fixed top-0 left-0 right-0 h-[3px] origin-left z-50"
+    >
+      <div className="h-full w-full bg-gradient-to-r from-sky-400 via-violet-400 to-pink-400" />
+    </motion.div>
+  );
+}
+
+function SectionIndex({ n }) {
+  return (
+    <span className="text-xs font-mono text-neutral-400 tracking-widest mr-2 align-middle">
+      {String(n).padStart(2, "0")} /
+    </span>
+  );
+}
+
+function Section({ id, title, subtitle, index, children }) {
+  return (
+    <motion.section
+      id={id}
+      className="mt-14"
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once: true, margin: "-80px" }}
+      variants={fadeUp}
+    >
+      <h2
+        className="text-xl font-semibold text-neutral-900"
+        style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+      >
+        {index != null && <SectionIndex n={index} />}
+        {title}
+      </h2>
+      {subtitle && (
+        <p className="text-neutral-500 text-sm mt-1 mb-5">{subtitle}</p>
+      )}
+      {!subtitle && <div className="mb-5" />}
+      {children}
+    </motion.section>
+  );
+}
+
+function Row({ logo, color, title, subtitle, period }, i) {
+  return (
+    <motion.div
+      key={title}
+      custom={i}
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once: true }}
+      variants={fadeUp}
+      className="flex items-start justify-between gap-4 py-3"
+    >
+      <div className="flex items-center gap-3">
+        <div
+          className="h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0"
+          style={{ backgroundColor: color }}
+        >
+          {logo}
+        </div>
+        <div>
+          <p className="font-semibold text-neutral-900 leading-tight">
+            {title}
+          </p>
+          <p className="text-sm text-neutral-500 leading-tight">{subtitle}</p>
+        </div>
+      </div>
+      <p className="text-sm text-neutral-400 whitespace-nowrap pt-2">
+        {period}
+      </p>
+    </motion.div>
+  );
+}
+
+function SkillPill({ Icon, label }, i) {
+  return (
+    <motion.span
+      key={label}
+      custom={i}
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once: true }}
+      variants={fadeUp}
+      whileHover={{ y: -2, scale: 1.03 }}
+      className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3.5 py-1.5 text-sm text-neutral-700 shadow-sm"
+    >
+      <Icon size={15} className="text-neutral-500" />
+      {label}
+    </motion.span>
+  );
+}
+
+function ProjectCard({
+  accent,
+  title,
+  period,
+  link,
+  github,
+  description,
+  tags,
+  i,
+}) {
+  const [pos, setPos] = React.useState({ x: 50, y: 0 });
+  const [hovering, setHovering] = React.useState(false);
+
+  return (
+    <motion.div
+      key={title}
+      custom={i}
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once: true, margin: "-60px" }}
+      variants={fadeUp}
+      whileHover={{ y: -4 }}
+      onMouseMove={(e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        setPos({
+          x: ((e.clientX - rect.left) / rect.width) * 100,
+          y: ((e.clientY - rect.top) / rect.height) * 100,
+        });
+      }}
+      onMouseEnter={() => setHovering(true)}
+      onMouseLeave={() => setHovering(false)}
+      className="relative rounded-2xl border border-neutral-200 overflow-hidden bg-white shadow-sm transition-shadow hover:shadow-md"
+    >
+      <div
+        className="pointer-events-none absolute inset-0 transition-opacity duration-300 z-10"
+        style={{
+          opacity: hovering ? 0.12 : 0,
+          background: `radial-gradient(220px circle at ${pos.x}% ${pos.y}%, ${accent}, transparent 70%)`,
+        }}
+      />
+      <div className="h-2" style={{ backgroundColor: accent }} />
+      <div className="relative h-32 sm:h-40 bg-neutral-50 flex items-center justify-center">
+        <div
+          className="absolute inset-0 opacity-10"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle, currentColor 1px, transparent 1px)",
+            backgroundSize: "14px 14px",
+            color: accent,
+          }}
+        />
+        <div className="absolute top-3 right-3 flex gap-2">
+          {link && (
+            <a
+              href={link}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1 rounded-full bg-neutral-900 text-white text-xs font-medium px-3 py-1.5"
+            >
+              🌐 Live
+            </a>
+          )}
+          {github && (
+            <a
+              href={github}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1 rounded-full bg-white border border-neutral-200 text-neutral-800 text-xs font-medium px-3 py-1.5"
+            >
+              ⌥ Code
+            </a>
+          )}
+        </div>
+        <span className="relative text-xl font-bold tracking-tight text-neutral-800">
+          {title}
+        </span>
+      </div>
+      <div className="p-5">
+        <div className="flex items-center justify-between">
+          <h3
+            className="font-semibold text-neutral-900"
+            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+          >
+            {title}
+          </h3>
+          <span className="text-neutral-400">↗</span>
+        </div>
+        <p className="text-sm text-neutral-400 mt-0.5">{period}</p>
+        <p className="text-sm text-neutral-600 mt-3 leading-relaxed">
+          {description}
+        </p>
+        <div className="flex flex-wrap gap-2 mt-4">
+          {tags.map((t) => (
+            <span
+              key={t}
+              className="text-xs rounded-full border border-neutral-200 px-2.5 py-1 text-neutral-600"
+            >
+              {t}
+            </span>
+          ))}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function FloatingDock() {
+  const links = [
+    { Icon: FaHome, label: "Home", href: "#" },
+    { Icon: FaBook, label: "Resume", href: "#" },
+    { Icon: FaGithub, label: "GitHub", href: "#" },
+    { Icon: FaLinkedin, label: "LinkedIn", href: "#" },
+    { Icon: FaTwitter, label: "X", href: "#" },
+    { Icon: FaYoutube, label: "YouTube", href: "#" },
+  ];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.3 }}
+      className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50"
+    >
+      <div className="flex items-center gap-1.5 rounded-full border border-neutral-200 dark:border-neutral-800 bg-white/90 dark:bg-neutral-900/90 backdrop-blur px-3 py-2 shadow-lg">
+        {links.map(({ Icon, label, href }) => (
+          <motion.a
+            key={label}
+            href={href}
+            aria-label={label}
+            whileHover={{ y: -3, scale: 1.08 }}
+            className="h-10 w-10 rounded-full flex items-center justify-center text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-white transition-colors"
+          >
+            <Icon size={17} />
+          </motion.a>
+        ))}
+        <div className="w-px h-6 bg-neutral-200 dark:bg-neutral-700 mx-1" />
+      </div>
+    </motion.div>
+  );
+}
+
+function Portfolio() {
+  // ---- Replace everything below with your real details ----
+
+  const name = "Shivam Yadav";
+  const role = "Full Stack Developer";
+  const tagline =
+    "I design and build fast, scalable, and user-centric web applications with a strong focus on clean architecture, responsive interfaces, and exceptional user experience.";
+
+  const skills = [
+    { Icon: FaReact, label: "React" },
+    { Icon: SiJavascript, label: "JavaScript" },
+    { Icon: FaHtml5, label: "HTML & CSS" },
+    { Icon: SiTailwindcss, label: "Tailwind CSS" },
+    { Icon: FaNodeJs, label: "Node.js" },
+    { Icon: FaPython, label: "Python" },
+    { Icon: SiMysql, label: "MySQL" },
+    { Icon: SiRedux, label: "Redux" },
+    { Icon: SiGit, label: "Git" },
+    { Icon: SiGithub, label: "Github" },
+    { Icon: FaServer, label: "REST APIs" },
+    { Icon: SiMongodb, label: "MongoDB" },
+    { Icon: SiExpress, label: "Express.Js" },
+    { Icon: SiSecurityscorecard, label: "Jwt Authentication " },
+    { Icon: SiFramer, label: "Framer-Motion " },
+    { Icon: SiFirebase, label: "Firebase " },
+    { Icon: SiVercel, label: "Vercel " },
+    { Icon: SiRender, label: "Render " },
+    { Icon: SiAxios, label: "Axios " },
+    { Icon: SiSocketdotio, label: "Socket.Io " },
+    { Icon: SiReactrouter, label: "React Router " },
+  ];
+
+  const projects = [
+    {
+      accent: "#2563EB",
+      title: "QueueLess",
+      period: "2026",
+      image: "/queueless.png",
+      link: "https://queueless.vercel.app",
+      github: "#",
+      description:
+        "A multi-tenant SaaS queue management platform where organizations create digital queues and customers join remotely using QR codes or public links.",
+      tags: ["React", "Node.js", "Express", "MongoDB", "JWT", "Tailwind CSS"],
+    },
+    {
+      accent: "#F97316",
+      title: "Reverto",
+      period: "2026",
+      image: "/reverto.png",
+      link: "https://reverto.vercel.app",
+      github: "#",
+      description:
+        "A community-driven lost and found platform for reporting, searching, and recovering lost belongings.",
+      tags: [
+        "React",
+        "Node.js",
+        "MongoDB",
+        "Cloudinary",
+        "JWT",
+        "Tailwind CSS",
+      ],
+    },
+    {
+      accent: "#10B981",
+      title: "ParkFlow",
+      period: "2026",
+      image: "/parkflow.png",
+      link: "#",
+      github: "#",
+      description:
+        "A smart parking management system for booking parking spaces and managing reservations.",
+      tags: ["React", "Node.Js", "Express.Js", "MongoDB", "Tailwind CSS"],
+    },
+  ];
+
+  const education = [
+    {
+      logo: "B",
+      color: "#000000",
+      title: "Bachelor of Computer Applications (BCA)",
+      subtitle: "Pt Chiranji Lal Sharma / Kurekshetra University",
+      period: "2023 - 2026",
+    },
+    {
+      logo: "H",
+      color: "#808080",
+      title: "Higher Secondary (XII)",
+      subtitle: "SD Adarsh public School",
+      period: "2020 - 2022",
+    },
+  ];
+
+  const certifications = [
+    {
+      logo: "✓",
+      color: "#10B981",
+      title: "JavaScript Algorithms and Data Structures",
+      subtitle: "freeCodeCamp",
+      period: "2025",
+    },
+    {
+      logo: "✓",
+      color: "#6366F1",
+      title: "React - The Complete Guide",
+      subtitle: "Udemy",
+      period: "2025",
+    },
+    {
+      logo: "✓",
+      color: "#F97316",
+      title: "Programming Fundamentals",
+      subtitle: "NPTEL / Coursera",
+      period: "2024",
+    },
+  ];
+  const toolbox = [
+    {
+      icon: FaCode,
+      title: "VS Code",
+      description: "Primary code editor",
+    },
+    {
+      icon: SiGit,
+      title: "Git",
+      description: "Version control",
+    },
+    {
+      icon: SiGithub,
+      title: "GitHub",
+      description: "Code hosting",
+    },
+    {
+      icon: SiPostman,
+      title: "Postman",
+      description: "API testing",
+    },
+    {
+      icon: SiFigma,
+      title: "Figma",
+      description: "UI inspiration",
+    },
+    {
+      icon: SiMongodb,
+      title: "MongoDB Compass",
+      description: "Database management",
+    },
+    {
+      icon: SiVercel,
+      title: "Vercel",
+      description: "Frontend deployment",
+    },
+    {
+      icon: SiRender,
+      title: "Render",
+      description: "Backend hosting",
+    },
+  ];
+
+  const achievements = [
+    {
+      icon: FaRocket,
+      title: "3+ Production Projects",
+      description:
+        "Built and deployed full-stack web applications solving real-world problems.",
+    },
+    {
+      icon: FaShieldAlt,
+      title: "Authentication Systems",
+      description:
+        "Implemented secure JWT authentication, authorization, and protected routes.",
+    },
+    {
+      icon: FaLaptopCode,
+      title: "Modern UI Development",
+      description:
+        "Created responsive and interactive interfaces using React, Tailwind CSS, and Framer Motion.",
+    },
+    {
+      icon: FaCloudUploadAlt,
+      title: "Cloud Deployment",
+      description:
+        "Deployed and maintained applications on Vercel and Render with production-ready environments.",
+    },
+  ];
+
+  const developmentProcess = [
+    {
+      icon: FaLightbulb,
+      title: "Plan",
+      description:
+        "Understand the problem, gather requirements, and define the project structure.",
+    },
+    {
+      icon: FaPenNib,
+      title: "Design",
+      description:
+        "Create clean UI layouts, reusable components, and a great user experience.",
+    },
+    {
+      icon: FaCode,
+      title: "Develop",
+      description:
+        "Build scalable frontend and backend features using modern web technologies.",
+    },
+    {
+      icon: FaBug,
+      title: "Test",
+      description:
+        "Debug issues, validate functionality, and optimize performance across devices.",
+    },
+    {
+      icon: FaRocket,
+      title: "Deploy",
+      description:
+        "Deploy applications, monitor performance, and continuously improve based on feedback.",
+    },
+  ];
+
+  return (
+    <div
+      className="relative min-h-screen bg-white text-neutral-900 antialiased overflow-x-hidden"
+      style={{ fontFamily: "'Inter', sans-serif" }}
+    >
+
+
+{/* dot pattern  */}
+      <div className="absolute top-0 left-0 w-full h-40 overflow-hidden pointer-events-none">
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle, rgba(0,0,0,0.18) 1px, transparent 1px)",
+            backgroundSize: "8px 8px",
+            maskImage:
+              "linear-gradient(to bottom, black 45%, transparent 100%)",
+            WebkitMaskImage:
+              "linear-gradient(to bottom, black 45%, transparent 100%)",
+          }}
+        />
+      </div>
+      <ScrollProgress />
+
+      <div className="max-w-2xl mx-auto px-6 py-16">
+        {/* Hero / Main */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="flex flex-col-reverse lg:flex-row items-center justify-between gap-12"
+        >
+          {/* Left Content */}
+          <div className="flex-1">
+            <motion.span
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.15 }}
+              className="inline-flex items-center gap-1.5 rounded-full bg-green-50 border border-green-200 text-green-700 text-xs font-medium px-3 py-1 mb-4"
+            ></motion.span>
+
+          <h1
+  className="text-4xl md:text-5xl font-bold tracking-tight flex"
+  style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+  onMouseLeave={(e) => {
+    e.currentTarget.querySelectorAll("span").forEach((s) => {
+      s.style.transform = "scale(1)";
+    });
+  }}
+>
+  {`Hi, I'm ${name}`.split("").map((char, i) => (
+    <motion.span
+      key={i}
+      whileHover={{ scale: 1.4, fontWeight: 900 }}
+      transition={{ type: "spring", stiffness: 300, damping: 15 }}
+      style={{ display: "inline-block" }}
+    >
+      {char === " " ? "\u00A0" : char}
+    </motion.span>
+  ))}
+</h1>
+
+            <p className="text-neutral-700 font-medium text-lg mt-3">{role}</p>
+
+            <p className="text-neutral-500 mt-5 max-w-lg leading-relaxed">
+              {tagline}
+            </p>
+
+            <div className="flex gap-3 mt-8">
+              <a
+                href="#projects"
+                className="rounded-full bg-neutral-900 text-white text-sm font-medium px-6 py-3"
+              >
+                View Projects
+              </a>
+
+              <a
+                href="#contact"
+                className="rounded-full border border-neutral-300 text-neutral-700 text-sm font-medium px-6 py-3"
+              >
+                Contact Me
+              </a>
+            </div>
+          </div>
+
+          {/* Right Image */}
+          <div className="relative shrink-0">
+            <div
+              className="absolute -inset-6 rounded-full opacity-30 blur-xl"
+              style={{
+                background:
+                  "radial-gradient(circle, rgba(96,165,250,0.5), transparent 70%)",
+              }}
+            />
+
+            <div className="relative shrink-0">
+              <div
+                className="absolute -inset-3 rounded-full opacity-30 blur-lg"
+                style={{
+                  background:
+                    "radial-gradient(circle, rgba(96,165,250,0.5), transparent 70%)",
+                }}
+              />
+
+              <div className="relative h-60 w-60 rounded-full overflow-hidden border-4 border-white shadow-xl bg-neutral-100">
+                <img
+                  src="/profile.jpeg"
+                  alt={name}
+                  className="w-full h-full object-cover object-top"
+                />
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Resume */}
+        <Section id="resume" title="Resume" index={1}>
+          <div className="flex flex-col sm:flex-row items-center gap-6 rounded-2xl border border-neutral-200 bg-white p-6 sm:p-7">
+            {/* Mini document preview */}
+            <motion.a
+              href="/resume.pdf"
+              target="_blank"
+              rel="noreferrer"
+              whileHover={{ y: -4, rotate: -1 }}
+              className="relative shrink-0 block"
+            >
+              {/* stacked paper effect */}
+              <div className="absolute top-2 left-2 w-32 h-44 rounded-lg bg-neutral-100 border border-neutral-200" />
+              <div className="absolute top-1 left-1 w-32 h-44 rounded-lg bg-neutral-50 border border-neutral-200" />
+
+              <div className="relative w-32 h-44 rounded-lg bg-white border border-neutral-200 shadow-sm p-3 overflow-hidden">
+                {/* fake header */}
+                <div className="h-2.5 w-14 rounded-full bg-neutral-800 mb-1.5" />
+                <div className="h-1.5 w-10 rounded-full bg-neutral-300 mb-3" />
+
+                {/* fake lines of text */}
+                <div className="space-y-1.5">
+                  <div className="h-1 w-full rounded-full bg-neutral-200" />
+                  <div className="h-1 w-5/6 rounded-full bg-neutral-200" />
+                  <div className="h-1 w-full rounded-full bg-neutral-200" />
+                  <div className="h-1 w-2/3 rounded-full bg-neutral-200" />
+                </div>
+
+                <div className="h-1.5 w-12 rounded-full bg-neutral-300 mt-3 mb-1.5" />
+                <div className="space-y-1.5">
+                  <div className="h-1 w-full rounded-full bg-neutral-200" />
+                  <div className="h-1 w-4/5 rounded-full bg-neutral-200" />
+                </div>
+
+                <div
+                  className="absolute bottom-0 right-0 h-8 w-8 opacity-80"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, transparent 50%, #e5e7eb 50%)",
+                  }}
+                />
+              </div>
+            </motion.a>
+
+            <div className="flex-1 text-center sm:text-left">
+              <h3
+                className="font-semibold text-neutral-900 text-lg"
+                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+              >
+                My Resume
+              </h3>
+              <p className="text-sm text-neutral-500 mt-1 max-w-sm">
+                A quick one-page summary of my skills, projects, and education —
+                view it in your browser or download a copy.
+              </p>
+
+              <div className="flex flex-wrap justify-center sm:justify-start gap-3 mt-4">
+                <motion.a
+                  href="/resume.pdf"
+                  target="_blank"
+                  rel="noreferrer"
+                  whileHover={{ y: -2, scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  className="inline-flex items-center gap-2 rounded-full bg-neutral-900 text-white text-sm font-medium px-5 py-2.5"
+                >
+                  Open in new tab <FaArrowRight size={12} />
+                </motion.a>
+
+                <motion.a
+                  href="/resume.pdf"
+                  download
+                  whileHover={{ y: -2, scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  className="inline-flex items-center gap-2 rounded-full border border-neutral-300 text-neutral-700 text-sm font-medium px-5 py-2.5"
+                >
+                  Download
+                </motion.a>
+              </div>
+            </div>
+          </div>
+        </Section>
+
+        {/* About */}
+        <Section
+          id="about"
+          title="About"
+          subtitle="A little about me and what I enjoy building."
+          index={1}
+        >
+          <div className="max-w-4xl space-y-5 text-lg leading-9 text-neutral-600">
+            <p>
+              I'm a{" "}
+              <span className="relative inline-block font-medium text-neutral-900">
+                Computer Science graduate
+                <span className="absolute left-0 bottom-1 -z-10 h-2 w-full rounded bg-yellow-200" />
+              </span>{" "}
+              passionate about building{" "}
+              <span className="relative inline-block font-medium text-neutral-900">
+                modern, scalable web applications
+                <span className="absolute left-0 bottom-1 -z-10 h-2 w-full rounded bg-yellow-200" />
+              </span>
+              . I enjoy transforming ideas into intuitive digital experiences
+              through clean code, responsive interfaces, and thoughtful design.
+            </p>
+
+            <p>
+              I've built projects like{" "}
+              <span className="relative inline-block font-medium text-neutral-900">
+                QueueLess
+                <span className="absolute left-0 bottom-1 -z-10 h-2 w-full rounded bg-yellow-200" />
+              </span>
+              ,{" "}
+              <span className="relative inline-block font-medium text-neutral-900">
+                Reverto
+                <span className="absolute left-0 bottom-1 -z-10 h-2 w-full rounded bg-yellow-200" />
+              </span>
+              , and{" "}
+              <span className="relative inline-block font-medium text-neutral-900">
+                ParkFlow
+                <span className="absolute left-0 bottom-1 -z-10 h-2 w-full rounded bg-yellow-200" />
+              </span>
+              , strengthening my skills in the MERN stack, REST APIs,
+              authentication, and backend architecture. I'm currently seeking
+              opportunities where I can{" "}
+              <span className="relative inline-block font-medium text-neutral-900">
+                learn, collaborate, and contribute
+                <span className="absolute left-0 bottom-1 -z-10 h-2 w-full rounded bg-yellow-200" />
+              </span>{" "}
+              while growing as a full-stack developer.
+            </p>
+          </div>
+        </Section>
+
+        {/* Skills */}
+        <Section id="skills" title="Skills" index={2}>
+          <div className="flex flex-wrap gap-2.5">
+            {skills.map((s, i) => SkillPill(s, i))}
+          </div>
+        </Section>
+
+        {/* Projects */}
+        <Section
+          id="projects"
+          title="Featured Projects"
+          subtitle="Real-world applications I've built."
+          index={3}
+        >
+          <div className="space-y-28">
+            {projects.map((project, i) => (
+              <motion.div
+                key={project.title}
+                custom={i}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true }}
+                variants={fadeUp}
+                className={`grid lg:grid-cols-2 gap-12 items-center ${
+                  i % 2 !== 0 ? "lg:[&>*:first-child]:order-2" : ""
+                }`}
+              >
+                {/* Image */}
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ type: "spring", stiffness: 250 }}
+                  className="group relative overflow-hidden rounded-3xl border border-neutral-200 bg-neutral-100 aspect-video"
+                >
+                  <img
+                    src={project.image}
+                    alt={project.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+
+                  <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                    <span className="text-white font-medium">
+                      View Project →
+                    </span>
+                  </div>
+                </motion.div>
+
+                <div>
+                  <span className="text-sm uppercase tracking-[0.3em] text-neutral-400">
+                    0{i + 1}
+                  </span>
+
+                  <h2
+                    className="mt-3 text-4xl font-bold"
+                    style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                  >
+                    {project.title}
+                  </h2>
+
+                  <p className="mt-6 text-neutral-600 leading-8">
+                    {project.description}
+                  </p>
+
+                  <div className="flex flex-wrap gap-2 mt-8">
+                    {project.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="rounded-full border border-neutral-200 px-4 py-2 text-sm"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="flex gap-8 mt-10">
+                    <a
+                      href={project.link}
+                      className="font-medium hover:underline"
+                    >
+                      Live Demo →
+                    </a>
+
+                    <a
+                      href={project.github}
+                      className="font-medium hover:underline"
+                    >
+                      GitHub →
+                    </a>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </Section>
+
+
+        {/* process */}
+
+        <Section
+          id="process"
+          title="Development Process"
+          subtitle="My approach to building reliable web applications."
+          index={4}
+        >
+          <div className="space-y-6">
+            {developmentProcess.map((step, i) => (
+              <motion.div
+                key={step.title}
+                custom={i}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true }}
+                variants={fadeUp}
+                whileHover={{ x: 8 }}
+                className="group border-b border-neutral-200 pb-6 last:border-none"
+              >
+                <div className="flex items-start gap-6">
+                  <span
+                    className="text-5xl font-bold text-neutral-200 group-hover:text-neutral-900 transition-colors"
+                    style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                  >
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3">
+                      <step.icon
+                        size={20}
+                        className="text-neutral-500 group-hover:text-neutral-900 transition-colors"
+                      />
+
+                      <h3
+                        className="text-xl font-semibold"
+                        style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                      >
+                        {step.title}
+                      </h3>
+                    </div>
+
+                    <p className="mt-3 text-neutral-500 leading-relaxed max-w-2xl">
+                      {step.description}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </Section>
+
+        {/* toolbox */}
+
+        <Section
+          id="toolbox"
+          title="Toolbox"
+          subtitle="The tools I use to design, build, test and deploy applications."
+          index={5}
+        >
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {toolbox.map((tool, i) => (
+              <motion.div
+                key={tool.title}
+                custom={i}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true }}
+                variants={fadeUp}
+                whileHover={{
+                  y: -5,
+                  scale: 1.03,
+                }}
+                transition={{ type: "spring", stiffness: 300 }}
+                className="group rounded-2xl border border-neutral-200 bg-white p-5 hover:border-neutral-900 transition-all"
+              >
+                <tool.icon
+                  size={34}
+                  className="text-neutral-700 group-hover:text-black transition-colors"
+                />
+
+                <h3
+                  className="mt-5 font-semibold"
+                  style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                >
+                  {tool.title}
+                </h3>
+
+                <p className="mt-1 text-sm text-neutral-500">
+                  {tool.description}
+                </p>
+              </motion.div>
+            ))}
+          </div>
+        </Section>
+
+        {/* education */}
+
+        <Section
+          id="education"
+          title="Education"
+          subtitle="My academic journey."
+          index={6}
+        >
+          <div className="relative border-l-2 border-neutral-200 ml-4 space-y-10">
+            {education.map((e, i) => (
+              <motion.div
+                key={e.title}
+                custom={i}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true }}
+                variants={fadeUp}
+                className="relative pl-8"
+              >
+                <div
+                  className="absolute -left-[11px] top-2 h-5 w-5 rounded-full border-4 border-white shadow"
+                  style={{ backgroundColor: e.color }}
+                />
+
+                <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm hover:shadow-md transition">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3
+                        className="text-lg font-semibold text-neutral-900"
+                        style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                      >
+                        {e.title}
+                      </h3>
+
+                      <p className="text-neutral-600 mt-1">{e.subtitle}</p>
+                    </div>
+
+                    <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-500">
+                      {e.period}
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </Section>
+
+        {/* achievments */}
+        <Section
+          id="achievements"
+          title="Highlights"
+          subtitle="Highlights from my journey as a developer."
+          index={7}
+        >
+          <div className="space-y-5">
+            {achievements.map((a, i) => (
+              <motion.div
+                key={a.title}
+                custom={i}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true }}
+                variants={fadeUp}
+                whileHover={{ x: 6 }}
+                className="group flex items-start gap-5 border-l-2 border-neutral-200 pl-6 py-2"
+              >
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-white transition-all duration-300 group-hover:scale-110">
+                  <a.icon size={20} />
+                </div>
+
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <h3
+                      className="text-lg font-semibold"
+                      style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                    >
+                      {a.title}
+                    </h3>
+
+                    <span className="text-sm text-neutral-400">0{i + 1}</span>
+                  </div>
+
+                  <p className="mt-2 text-neutral-500 leading-relaxed">
+                    {a.description}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </Section>
+
+        <motion.section
+          id="contact"
+          className="mt-14"
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-80px" }}
+          variants={fadeUp}
+        >
+          <div className="relative overflow-hidden rounded-3xl bg-neutral-900 px-8 py-12 text-center">
+            <div
+              className="absolute inset-0 opacity-[0.07]"
+              style={{
+                backgroundImage:
+                  "radial-gradient(circle, #fff 1px, transparent 1px)",
+                backgroundSize: "16px 16px",
+              }}
+            />
+            <div className="relative">
+              <h2
+                className="text-2xl sm:text-3xl font-semibold text-white tracking-tight"
+                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+              >
+                Let's build something together
+              </h2>
+              <p className="text-neutral-400 mt-3 max-w-sm mx-auto">
+                I'm actively looking for my first developer role. Reach out for
+                opportunities, collaborations, or just to say hi.
+              </p>
+
+              <motion.a
+                href="mailto:you@example.com"
+                whileHover={{ y: -2, scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                className="inline-flex items-center gap-2 mt-7 rounded-full bg-white text-neutral-900 text-sm font-semibold px-6 py-3"
+              >
+                Say hello <FaArrowRight size={13} />
+              </motion.a>
+
+              <div className="flex items-center justify-center gap-5 mt-8">
+                <a
+                  href="#"
+                  aria-label="GitHub"
+                  className="text-neutral-400 hover:text-white transition-colors"
+                >
+                  <FaGithub size={20} />
+                </a>
+                <a
+                  href="#"
+                  aria-label="LinkedIn"
+                  className="text-neutral-400 hover:text-white transition-colors"
+                >
+                  <FaLinkedin size={20} />
+                </a>
+                <a
+                  href="#"
+                  aria-label="X"
+                  className="text-neutral-400 hover:text-white transition-colors"
+                >
+                  <FaTwitter size={20} />
+                </a>
+                <a
+                  href="#"
+                  aria-label="Resume"
+                  className="text-neutral-400 hover:text-white transition-colors"
+                >
+                  <FaBook size={20} />
+                </a>
+              </div>
+            </div>
+          </div>
+        </motion.section>
+
+        <div className="h-28" />
+      </div>
+      <FloatingDock />
+    </div>
+  );
+}
+
+const GREETINGS = [
+  { text: "नमस्ते", lang: "Hindi" },
+  { text: "Hello", lang: "English" },
+  { text: "Bonjour", lang: "French" },
+  { text: "こんにちは", lang: "Japanese" },
+  { text: "⠓⠑⠇⠇⠕", lang: "Braille" },
+];
+
+const PER_WORD_MS = 1000;
+
+function IntroGreeting({ onComplete }) {
+  const [index, setIndex] = React.useState(0);
+  const [exiting, setExiting] = React.useState(false);
+
+  React.useEffect(() => {
+    if (index >= GREETINGS.length - 1) {
+      const exitTimer = setTimeout(() => setExiting(true), PER_WORD_MS + 250);
+      const doneTimer = setTimeout(
+        () => onComplete && onComplete(),
+        PER_WORD_MS + 900,
+      );
+      return () => {
+        clearTimeout(exitTimer);
+        clearTimeout(doneTimer);
+      };
+    }
+    const t = setTimeout(() => setIndex((i) => i + 1), PER_WORD_MS);
+    return () => clearTimeout(t);
+  }, [index, onComplete]);
+
+  const skip = () => {
+    setExiting(true);
+    setTimeout(() => onComplete && onComplete(), 500);
+  };
+
+  const current = GREETINGS[index];
+
+  return (
+    <AnimatePresence>
+      {!exiting && (
+        <motion.div
+          key="intro-root"
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.5, ease: "easeInOut" }}
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-neutral-950"
+        >
+          <div className="absolute top-8 left-1/2 -translate-x-1/2 flex gap-1.5">
+            {GREETINGS.map((g, i) => (
+              <span
+                key={g.lang}
+                className="h-1 w-1 rounded-full transition-colors duration-300"
+                style={{
+                  backgroundColor:
+                    i <= index ? "#fff" : "rgba(255,255,255,0.2)",
+                }}
+              />
+            ))}
+          </div>
+
+          <div className="relative h-28 flex items-center justify-center px-6">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={current.text}
+                initial={{
+                  opacity: 0,
+                  y: 24,
+                  scale: 0.92,
+                  filter: "blur(6px)",
+                }}
+                animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+                exit={{ opacity: 0, y: -24, scale: 0.92, filter: "blur(6px)" }}
+                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                className="text-center"
+              >
+                <p
+                  className="text-white font-bold tracking-tight leading-none"
+                  style={{
+                    fontSize: "clamp(2.5rem, 9vw, 6rem)",
+                    fontFamily: "'Space Grotesk', sans-serif",
+                  }}
+                >
+                  {current.text}
+                </p>
+                <p className="mt-3 text-xs uppercase tracking-[0.25em] text-neutral-500">
+                  {current.lang}
+                </p>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          <motion.button
+            onClick={skip}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="absolute bottom-8 text-xs text-neutral-500 hover:text-white tracking-wide transition-colors"
+          >
+            Skip →
+          </motion.button>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+export default function App() {
+  const [showIntro, setShowIntro] = React.useState(true);
+
+  React.useEffect(() => {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href =
+      "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap";
+    document.head.appendChild(link);
+    return () => document.head.removeChild(link);
+  }, []);
+
+  return (
+    <>
+      {showIntro && <IntroGreeting onComplete={() => setShowIntro(false)} />}
+      <Portfolio />
+    </>
+  );
+}
