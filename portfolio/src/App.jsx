@@ -76,7 +76,7 @@ function ScrollProgress() {
 
 function SectionIndex({ n }) {
   return (
-    <span className="text-xs font-mono text-neutral-400 tracking-widest mr-2 align-middle">
+    <span className="text-xs font-mono text-neutral-400 dark:text-neutral-500 tracking-widest mr-2 align-middle">
       {String(n).padStart(2, "0")} /
     </span>
   );
@@ -93,14 +93,16 @@ function Section({ id, title, subtitle, index, children }) {
       variants={fadeUp}
     >
       <h2
-        className="text-xl font-semibold text-neutral-900"
+        className="text-xl font-semibold text-neutral-900 dark:text-white"
         style={{ fontFamily: "'Space Grotesk', sans-serif" }}
       >
         {index != null && <SectionIndex n={index} />}
         {title}
       </h2>
       {subtitle && (
-        <p className="text-neutral-500 text-sm mt-1 mb-5">{subtitle}</p>
+        <p className="text-neutral-500 dark:text-neutral-400 text-sm mt-1 mb-5">
+          {subtitle}
+        </p>
       )}
       {!subtitle && <div className="mb-5" />}
       {children}
@@ -127,13 +129,15 @@ function Row({ logo, color, title, subtitle, period }, i) {
           {logo}
         </div>
         <div>
-          <p className="font-semibold text-neutral-900 leading-tight">
+          <p className="font-semibold text-neutral-900 dark:text-white leading-tight">
             {title}
           </p>
-          <p className="text-sm text-neutral-500 leading-tight">{subtitle}</p>
+          <p className="text-sm text-neutral-500 dark:text-neutral-400 leading-tight">
+            {subtitle}
+          </p>
         </div>
       </div>
-      <p className="text-sm text-neutral-400 whitespace-nowrap pt-2">
+      <p className="text-sm text-neutral-400 dark:text-neutral-500 whitespace-nowrap pt-2">
         {period}
       </p>
     </motion.div>
@@ -150,9 +154,9 @@ function SkillPill({ Icon, label }, i) {
       viewport={{ once: true }}
       variants={fadeUp}
       whileHover={{ y: -2, scale: 1.03 }}
-      className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3.5 py-1.5 text-sm text-neutral-700 shadow-sm"
+      className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3.5 py-1.5 text-sm text-neutral-700 dark:text-neutral-200 shadow-sm"
     >
-      <Icon size={15} className="text-neutral-500" />
+      <Icon size={15} className="text-neutral-500 dark:text-neutral-400" />
       {label}
     </motion.span>
   );
@@ -189,7 +193,7 @@ function ProjectCard({
       }}
       onMouseEnter={() => setHovering(true)}
       onMouseLeave={() => setHovering(false)}
-      className="relative rounded-2xl border border-neutral-200 overflow-hidden bg-white shadow-sm transition-shadow hover:shadow-md"
+      className="relative rounded-2xl border border-neutral-200 dark:border-neutral-800 overflow-hidden bg-white dark:bg-neutral-900 shadow-sm transition-shadow hover:shadow-md"
     >
       <div
         className="pointer-events-none absolute inset-0 transition-opacity duration-300 z-10"
@@ -199,7 +203,7 @@ function ProjectCard({
         }}
       />
       <div className="h-2" style={{ backgroundColor: accent }} />
-      <div className="relative h-32 sm:h-40 bg-neutral-50 flex items-center justify-center">
+      <div className="relative h-32 sm:h-40 bg-neutral-50 dark:bg-neutral-800 flex items-center justify-center">
         <div
           className="absolute inset-0 opacity-10"
           style={{
@@ -215,7 +219,7 @@ function ProjectCard({
               href={link}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1 rounded-full bg-neutral-900 text-white text-xs font-medium px-3 py-1.5"
+              className="inline-flex items-center gap-1 rounded-full bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-xs font-medium px-3 py-1.5"
             >
               🌐 Live
             </a>
@@ -225,35 +229,37 @@ function ProjectCard({
               href={github}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1 rounded-full bg-white border border-neutral-200 text-neutral-800 text-xs font-medium px-3 py-1.5"
+              className="inline-flex items-center gap-1 rounded-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200 text-xs font-medium px-3 py-1.5"
             >
               ⌥ Code
             </a>
           )}
         </div>
-        <span className="relative text-xl font-bold tracking-tight text-neutral-800">
+        <span className="relative text-xl font-bold tracking-tight text-neutral-800 dark:text-neutral-100">
           {title}
         </span>
       </div>
       <div className="p-5">
         <div className="flex items-center justify-between">
           <h3
-            className="font-semibold text-neutral-900"
+            className="font-semibold text-neutral-900 dark:text-white"
             style={{ fontFamily: "'Space Grotesk', sans-serif" }}
           >
             {title}
           </h3>
-          <span className="text-neutral-400">↗</span>
+          <span className="text-neutral-400 dark:text-neutral-500">↗</span>
         </div>
-        <p className="text-sm text-neutral-400 mt-0.5">{period}</p>
-        <p className="text-sm text-neutral-600 mt-3 leading-relaxed">
+        <p className="text-sm text-neutral-400 dark:text-neutral-500 mt-0.5">
+          {period}
+        </p>
+        <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-3 leading-relaxed">
           {description}
         </p>
         <div className="flex flex-wrap gap-2 mt-4">
           {tags.map((t) => (
             <span
               key={t}
-              className="text-xs rounded-full border border-neutral-200 px-2.5 py-1 text-neutral-600"
+              className="text-xs rounded-full border border-neutral-200 dark:border-neutral-700 px-2.5 py-1 text-neutral-600 dark:text-neutral-400"
             >
               {t}
             </span>
@@ -264,7 +270,7 @@ function ProjectCard({
   );
 }
 
-function FloatingDock() {
+function FloatingDock({ theme, toggleTheme }) {
   const links = [
     { Icon: FaHome, label: "Home", href: "#" },
     { Icon: FaBook, label: "Resume", href: "#" },
@@ -294,12 +300,22 @@ function FloatingDock() {
           </motion.a>
         ))}
         <div className="w-px h-6 bg-neutral-200 dark:bg-neutral-700 mx-1" />
+
+        <motion.button
+          onClick={toggleTheme}
+          aria-label="Toggle theme"
+          whileHover={{ y: -3, scale: 1.08 }}
+          whileTap={{ scale: 0.9 }}
+          className="h-10 w-10 rounded-full flex items-center justify-center text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-white transition-colors"
+        >
+          {theme === "dark" ? <FaSun size={16} /> : <FaMoon size={16} />}
+        </motion.button>
       </div>
     </motion.div>
   );
 }
 
-function Portfolio() {
+function Portfolio({ theme, toggleTheme }) {
   // ---- Replace everything below with your real details ----
 
   const name = "Shivam Yadav";
@@ -519,15 +535,13 @@ function Portfolio() {
 
   return (
     <div
-      className="relative min-h-screen bg-white text-neutral-900 antialiased overflow-x-hidden"
+      className="relative min-h-screen bg-white dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 antialiased overflow-x-hidden transition-colors duration-300"
       style={{ fontFamily: "'Inter', sans-serif" }}
     >
-
-
-{/* dot pattern  */}
+      {/* dot pattern  */}
       <div className="absolute top-0 left-0 w-full h-40 overflow-hidden pointer-events-none">
         <div
-          className="absolute inset-0"
+          className="absolute inset-0 dark:opacity-40"
           style={{
             backgroundImage:
               "radial-gradient(circle, rgba(0,0,0,0.18) 1px, transparent 1px)",
@@ -555,47 +569,49 @@ function Portfolio() {
               initial={{ opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.15 }}
-              className="inline-flex items-center gap-1.5 rounded-full bg-green-50 border border-green-200 text-green-700 text-xs font-medium px-3 py-1 mb-4"
+              className="inline-flex items-center gap-1.5 rounded-full bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 text-xs font-medium px-3 py-1 mb-4"
             ></motion.span>
 
-          <h1
-  className="text-4xl md:text-5xl font-bold tracking-tight flex"
-  style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-  onMouseLeave={(e) => {
-    e.currentTarget.querySelectorAll("span").forEach((s) => {
-      s.style.transform = "scale(1)";
-    });
-  }}
->
-  {`Hi, I'm ${name}`.split("").map((char, i) => (
-    <motion.span
-      key={i}
-      whileHover={{ scale: 1.4, fontWeight: 900 }}
-      transition={{ type: "spring", stiffness: 300, damping: 15 }}
-      style={{ display: "inline-block" }}
-    >
-      {char === " " ? "\u00A0" : char}
-    </motion.span>
-  ))}
-</h1>
+            <h1
+              className="text-4xl md:text-5xl font-bold tracking-tight flex text-neutral-900 dark:text-white"
+              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+              onMouseLeave={(e) => {
+                e.currentTarget.querySelectorAll("span").forEach((s) => {
+                  s.style.transform = "scale(1)";
+                });
+              }}
+            >
+              {`Hi, I'm ${name}`.split("").map((char, i) => (
+                <motion.span
+                  key={i}
+                  whileHover={{ scale: 1.4, fontWeight: 900 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                  style={{ display: "inline-block" }}
+                >
+                  {char === " " ? "\u00A0" : char}
+                </motion.span>
+              ))}
+            </h1>
 
-            <p className="text-neutral-700 font-medium text-lg mt-3">{role}</p>
+            <p className="text-neutral-700 dark:text-neutral-300 font-medium text-lg mt-3">
+              {role}
+            </p>
 
-            <p className="text-neutral-500 mt-5 max-w-lg leading-relaxed">
+            <p className="text-neutral-500 dark:text-neutral-400 mt-5 max-w-lg leading-relaxed">
               {tagline}
             </p>
 
             <div className="flex gap-3 mt-8">
               <a
                 href="#projects"
-                className="rounded-full bg-neutral-900 text-white text-sm font-medium px-6 py-3"
+                className="rounded-full bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-sm font-medium px-6 py-3"
               >
                 View Projects
               </a>
 
               <a
                 href="#contact"
-                className="rounded-full border border-neutral-300 text-neutral-700 text-sm font-medium px-6 py-3"
+                className="rounded-full border border-neutral-300 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 text-sm font-medium px-6 py-3"
               >
                 Contact Me
               </a>
@@ -621,7 +637,7 @@ function Portfolio() {
                 }}
               />
 
-              <div className="relative h-60 w-60 rounded-full overflow-hidden border-4 border-white shadow-xl bg-neutral-100">
+              <div className="relative h-60 w-60 rounded-full overflow-hidden border-4 border-white dark:border-neutral-800 shadow-xl bg-neutral-100 dark:bg-neutral-800">
                 <img
                   src="/profile.jpeg"
                   alt={name}
@@ -634,7 +650,7 @@ function Portfolio() {
 
         {/* Resume */}
         <Section id="resume" title="Resume" index={1}>
-          <div className="flex flex-col sm:flex-row items-center gap-6 rounded-2xl border border-neutral-200 bg-white p-6 sm:p-7">
+          <div className="flex flex-col sm:flex-row items-center gap-6 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-6 sm:p-7">
             {/* Mini document preview */}
             <motion.a
               href="/resume.pdf"
@@ -644,26 +660,26 @@ function Portfolio() {
               className="relative shrink-0 block"
             >
               {/* stacked paper effect */}
-              <div className="absolute top-2 left-2 w-32 h-44 rounded-lg bg-neutral-100 border border-neutral-200" />
-              <div className="absolute top-1 left-1 w-32 h-44 rounded-lg bg-neutral-50 border border-neutral-200" />
+              <div className="absolute top-2 left-2 w-32 h-44 rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700" />
+              <div className="absolute top-1 left-1 w-32 h-44 rounded-lg bg-neutral-50 dark:bg-neutral-800/70 border border-neutral-200 dark:border-neutral-700" />
 
-              <div className="relative w-32 h-44 rounded-lg bg-white border border-neutral-200 shadow-sm p-3 overflow-hidden">
+              <div className="relative w-32 h-44 rounded-lg bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 shadow-sm p-3 overflow-hidden">
                 {/* fake header */}
-                <div className="h-2.5 w-14 rounded-full bg-neutral-800 mb-1.5" />
-                <div className="h-1.5 w-10 rounded-full bg-neutral-300 mb-3" />
+                <div className="h-2.5 w-14 rounded-full bg-neutral-800 dark:bg-neutral-200 mb-1.5" />
+                <div className="h-1.5 w-10 rounded-full bg-neutral-300 dark:bg-neutral-700 mb-3" />
 
                 {/* fake lines of text */}
                 <div className="space-y-1.5">
-                  <div className="h-1 w-full rounded-full bg-neutral-200" />
-                  <div className="h-1 w-5/6 rounded-full bg-neutral-200" />
-                  <div className="h-1 w-full rounded-full bg-neutral-200" />
-                  <div className="h-1 w-2/3 rounded-full bg-neutral-200" />
+                  <div className="h-1 w-full rounded-full bg-neutral-200 dark:bg-neutral-700" />
+                  <div className="h-1 w-5/6 rounded-full bg-neutral-200 dark:bg-neutral-700" />
+                  <div className="h-1 w-full rounded-full bg-neutral-200 dark:bg-neutral-700" />
+                  <div className="h-1 w-2/3 rounded-full bg-neutral-200 dark:bg-neutral-700" />
                 </div>
 
-                <div className="h-1.5 w-12 rounded-full bg-neutral-300 mt-3 mb-1.5" />
+                <div className="h-1.5 w-12 rounded-full bg-neutral-300 dark:bg-neutral-700 mt-3 mb-1.5" />
                 <div className="space-y-1.5">
-                  <div className="h-1 w-full rounded-full bg-neutral-200" />
-                  <div className="h-1 w-4/5 rounded-full bg-neutral-200" />
+                  <div className="h-1 w-full rounded-full bg-neutral-200 dark:bg-neutral-700" />
+                  <div className="h-1 w-4/5 rounded-full bg-neutral-200 dark:bg-neutral-700" />
                 </div>
 
                 <div
@@ -678,12 +694,12 @@ function Portfolio() {
 
             <div className="flex-1 text-center sm:text-left">
               <h3
-                className="font-semibold text-neutral-900 text-lg"
+                className="font-semibold text-neutral-900 dark:text-white text-lg"
                 style={{ fontFamily: "'Space Grotesk', sans-serif" }}
               >
                 My Resume
               </h3>
-              <p className="text-sm text-neutral-500 mt-1 max-w-sm">
+              <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1 max-w-sm">
                 A quick one-page summary of my skills, projects, and education —
                 view it in your browser or download a copy.
               </p>
@@ -695,7 +711,7 @@ function Portfolio() {
                   rel="noreferrer"
                   whileHover={{ y: -2, scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
-                  className="inline-flex items-center gap-2 rounded-full bg-neutral-900 text-white text-sm font-medium px-5 py-2.5"
+                  className="inline-flex items-center gap-2 rounded-full bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-sm font-medium px-5 py-2.5"
                 >
                   Open in new tab <FaArrowRight size={12} />
                 </motion.a>
@@ -705,7 +721,7 @@ function Portfolio() {
                   download
                   whileHover={{ y: -2, scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
-                  className="inline-flex items-center gap-2 rounded-full border border-neutral-300 text-neutral-700 text-sm font-medium px-5 py-2.5"
+                  className="inline-flex items-center gap-2 rounded-full border border-neutral-300 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 text-sm font-medium px-5 py-2.5"
                 >
                   Download
                 </motion.a>
@@ -721,17 +737,17 @@ function Portfolio() {
           subtitle="A little about me and what I enjoy building."
           index={1}
         >
-          <div className="max-w-4xl space-y-5 text-lg leading-9 text-neutral-600">
+          <div className="max-w-4xl space-y-5 text-lg leading-9 text-neutral-600 dark:text-neutral-400">
             <p>
               I'm a{" "}
-              <span className="relative inline-block font-medium text-neutral-900">
+              <span className="relative inline-block font-medium text-neutral-900 dark:text-white">
                 Computer Science graduate
-                <span className="absolute left-0 bottom-1 -z-10 h-2 w-full rounded bg-yellow-200" />
+                <span className="absolute left-0 bottom-1 -z-10 h-2 w-full rounded bg-yellow-200 dark:bg-yellow-500/40" />
               </span>{" "}
               passionate about building{" "}
-              <span className="relative inline-block font-medium text-neutral-900">
+              <span className="relative inline-block font-medium text-neutral-900 dark:text-white">
                 modern, scalable web applications
-                <span className="absolute left-0 bottom-1 -z-10 h-2 w-full rounded bg-yellow-200" />
+                <span className="absolute left-0 bottom-1 -z-10 h-2 w-full rounded bg-yellow-200 dark:bg-yellow-500/40" />
               </span>
               . I enjoy transforming ideas into intuitive digital experiences
               through clean code, responsive interfaces, and thoughtful design.
@@ -739,26 +755,26 @@ function Portfolio() {
 
             <p>
               I've built projects like{" "}
-              <span className="relative inline-block font-medium text-neutral-900">
+              <span className="relative inline-block font-medium text-neutral-900 dark:text-white">
                 QueueLess
-                <span className="absolute left-0 bottom-1 -z-10 h-2 w-full rounded bg-yellow-200" />
+                <span className="absolute left-0 bottom-1 -z-10 h-2 w-full rounded bg-yellow-200 dark:bg-yellow-500/40" />
               </span>
               ,{" "}
-              <span className="relative inline-block font-medium text-neutral-900">
+              <span className="relative inline-block font-medium text-neutral-900 dark:text-white">
                 Reverto
-                <span className="absolute left-0 bottom-1 -z-10 h-2 w-full rounded bg-yellow-200" />
+                <span className="absolute left-0 bottom-1 -z-10 h-2 w-full rounded bg-yellow-200 dark:bg-yellow-500/40" />
               </span>
               , and{" "}
-              <span className="relative inline-block font-medium text-neutral-900">
+              <span className="relative inline-block font-medium text-neutral-900 dark:text-white">
                 ParkFlow
-                <span className="absolute left-0 bottom-1 -z-10 h-2 w-full rounded bg-yellow-200" />
+                <span className="absolute left-0 bottom-1 -z-10 h-2 w-full rounded bg-yellow-200 dark:bg-yellow-500/40" />
               </span>
               , strengthening my skills in the MERN stack, REST APIs,
               authentication, and backend architecture. I'm currently seeking
               opportunities where I can{" "}
-              <span className="relative inline-block font-medium text-neutral-900">
+              <span className="relative inline-block font-medium text-neutral-900 dark:text-white">
                 learn, collaborate, and contribute
-                <span className="absolute left-0 bottom-1 -z-10 h-2 w-full rounded bg-yellow-200" />
+                <span className="absolute left-0 bottom-1 -z-10 h-2 w-full rounded bg-yellow-200 dark:bg-yellow-500/40" />
               </span>{" "}
               while growing as a full-stack developer.
             </p>
@@ -796,7 +812,7 @@ function Portfolio() {
                 <motion.div
                   whileHover={{ scale: 1.02 }}
                   transition={{ type: "spring", stiffness: 250 }}
-                  className="group relative overflow-hidden rounded-3xl border border-neutral-200 bg-neutral-100 aspect-video"
+                  className="group relative overflow-hidden rounded-3xl border border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-800 aspect-video"
                 >
                   <img
                     src={project.image}
@@ -812,18 +828,18 @@ function Portfolio() {
                 </motion.div>
 
                 <div>
-                  <span className="text-sm uppercase tracking-[0.3em] text-neutral-400">
+                  <span className="text-sm uppercase tracking-[0.3em] text-neutral-400 dark:text-neutral-500">
                     0{i + 1}
                   </span>
 
                   <h2
-                    className="mt-3 text-4xl font-bold"
+                    className="mt-3 text-4xl font-bold text-neutral-900 dark:text-white"
                     style={{ fontFamily: "'Space Grotesk', sans-serif" }}
                   >
                     {project.title}
                   </h2>
 
-                  <p className="mt-6 text-neutral-600 leading-8">
+                  <p className="mt-6 text-neutral-600 dark:text-neutral-400 leading-8">
                     {project.description}
                   </p>
 
@@ -831,7 +847,7 @@ function Portfolio() {
                     {project.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="rounded-full border border-neutral-200 px-4 py-2 text-sm"
+                        className="rounded-full border border-neutral-200 dark:border-neutral-700 px-4 py-2 text-sm text-neutral-700 dark:text-neutral-300"
                       >
                         {tag}
                       </span>
@@ -841,14 +857,14 @@ function Portfolio() {
                   <div className="flex gap-8 mt-10">
                     <a
                       href={project.link}
-                      className="font-medium hover:underline"
+                      className="font-medium text-neutral-900 dark:text-white hover:underline"
                     >
                       Live Demo →
                     </a>
 
                     <a
                       href={project.github}
-                      className="font-medium hover:underline"
+                      className="font-medium text-neutral-900 dark:text-white hover:underline"
                     >
                       GitHub →
                     </a>
@@ -858,7 +874,6 @@ function Portfolio() {
             ))}
           </div>
         </Section>
-
 
         {/* process */}
 
@@ -878,11 +893,11 @@ function Portfolio() {
                 viewport={{ once: true }}
                 variants={fadeUp}
                 whileHover={{ x: 8 }}
-                className="group border-b border-neutral-200 pb-6 last:border-none"
+                className="group border-b border-neutral-200 dark:border-neutral-800 pb-6 last:border-none"
               >
                 <div className="flex items-start gap-6">
                   <span
-                    className="text-5xl font-bold text-neutral-200 group-hover:text-neutral-900 transition-colors"
+                    className="text-5xl font-bold text-neutral-200 dark:text-neutral-800 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors"
                     style={{ fontFamily: "'Space Grotesk', sans-serif" }}
                   >
                     {String(i + 1).padStart(2, "0")}
@@ -892,18 +907,18 @@ function Portfolio() {
                     <div className="flex items-center gap-3">
                       <step.icon
                         size={20}
-                        className="text-neutral-500 group-hover:text-neutral-900 transition-colors"
+                        className="text-neutral-500 dark:text-neutral-400 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors"
                       />
 
                       <h3
-                        className="text-xl font-semibold"
+                        className="text-xl font-semibold text-neutral-900 dark:text-white"
                         style={{ fontFamily: "'Space Grotesk', sans-serif" }}
                       >
                         {step.title}
                       </h3>
                     </div>
 
-                    <p className="mt-3 text-neutral-500 leading-relaxed max-w-2xl">
+                    <p className="mt-3 text-neutral-500 dark:text-neutral-400 leading-relaxed max-w-2xl">
                       {step.description}
                     </p>
                   </div>
@@ -935,21 +950,21 @@ function Portfolio() {
                   scale: 1.03,
                 }}
                 transition={{ type: "spring", stiffness: 300 }}
-                className="group rounded-2xl border border-neutral-200 bg-white p-5 hover:border-neutral-900 transition-all"
+                className="group rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-5 hover:border-neutral-900 dark:hover:border-white transition-all"
               >
                 <tool.icon
                   size={34}
-                  className="text-neutral-700 group-hover:text-black transition-colors"
+                  className="text-neutral-700 dark:text-neutral-300 group-hover:text-black dark:group-hover:text-white transition-colors"
                 />
 
                 <h3
-                  className="mt-5 font-semibold"
+                  className="mt-5 font-semibold text-neutral-900 dark:text-white"
                   style={{ fontFamily: "'Space Grotesk', sans-serif" }}
                 >
                   {tool.title}
                 </h3>
 
-                <p className="mt-1 text-sm text-neutral-500">
+                <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
                   {tool.description}
                 </p>
               </motion.div>
@@ -965,7 +980,7 @@ function Portfolio() {
           subtitle="My academic journey."
           index={6}
         >
-          <div className="relative border-l-2 border-neutral-200 ml-4 space-y-10">
+          <div className="relative border-l-2 border-neutral-200 dark:border-neutral-800 ml-4 space-y-10">
             {education.map((e, i) => (
               <motion.div
                 key={e.title}
@@ -977,24 +992,26 @@ function Portfolio() {
                 className="relative pl-8"
               >
                 <div
-                  className="absolute -left-[11px] top-2 h-5 w-5 rounded-full border-4 border-white shadow"
+                  className="absolute -left-[11px] top-2 h-5 w-5 rounded-full border-4 border-white dark:border-neutral-950 shadow"
                   style={{ backgroundColor: e.color }}
                 />
 
-                <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm hover:shadow-md transition">
+                <div className="rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-5 shadow-sm hover:shadow-md transition">
                   <div className="flex justify-between items-start">
                     <div>
                       <h3
-                        className="text-lg font-semibold text-neutral-900"
+                        className="text-lg font-semibold text-neutral-900 dark:text-white"
                         style={{ fontFamily: "'Space Grotesk', sans-serif" }}
                       >
                         {e.title}
                       </h3>
 
-                      <p className="text-neutral-600 mt-1">{e.subtitle}</p>
+                      <p className="text-neutral-600 dark:text-neutral-400 mt-1">
+                        {e.subtitle}
+                      </p>
                     </div>
 
-                    <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-500">
+                    <span className="rounded-full bg-neutral-100 dark:bg-neutral-800 px-3 py-1 text-xs font-medium text-neutral-500 dark:text-neutral-400">
                       {e.period}
                     </span>
                   </div>
@@ -1021,25 +1038,27 @@ function Portfolio() {
                 viewport={{ once: true }}
                 variants={fadeUp}
                 whileHover={{ x: 6 }}
-                className="group flex items-start gap-5 border-l-2 border-neutral-200 pl-6 py-2"
+                className="group flex items-start gap-5 border-l-2 border-neutral-200 dark:border-neutral-800 pl-6 py-2"
               >
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-white transition-all duration-300 group-hover:scale-110">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 transition-all duration-300 group-hover:scale-110">
                   <a.icon size={20} />
                 </div>
 
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <h3
-                      className="text-lg font-semibold"
+                      className="text-lg font-semibold text-neutral-900 dark:text-white"
                       style={{ fontFamily: "'Space Grotesk', sans-serif" }}
                     >
                       {a.title}
                     </h3>
 
-                    <span className="text-sm text-neutral-400">0{i + 1}</span>
+                    <span className="text-sm text-neutral-400 dark:text-neutral-500">
+                      0{i + 1}
+                    </span>
                   </div>
 
-                  <p className="mt-2 text-neutral-500 leading-relaxed">
+                  <p className="mt-2 text-neutral-500 dark:text-neutral-400 leading-relaxed">
                     {a.description}
                   </p>
                 </div>
@@ -1122,7 +1141,7 @@ function Portfolio() {
 
         <div className="h-28" />
       </div>
-      <FloatingDock />
+      <FloatingDock theme={theme} toggleTheme={toggleTheme} />
     </div>
   );
 }
@@ -1234,6 +1253,7 @@ function IntroGreeting({ onComplete }) {
 
 export default function App() {
   const [showIntro, setShowIntro] = React.useState(true);
+  const [theme, setTheme] = React.useState("light");
 
   React.useEffect(() => {
     const link = document.createElement("link");
@@ -1244,10 +1264,16 @@ export default function App() {
     return () => document.head.removeChild(link);
   }, []);
 
+  React.useEffect(() => {
+    document.documentElement.classList.toggle("dark", theme === "dark");
+  }, [theme]);
+
+  const toggleTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
+
   return (
     <>
       {showIntro && <IntroGreeting onComplete={() => setShowIntro(false)} />}
-      <Portfolio />
+      <Portfolio theme={theme} toggleTheme={toggleTheme} />
     </>
   );
 }
