@@ -1156,16 +1156,18 @@ const GREETINGS = [
 
 const PER_WORD_MS = 1000;
 
-function IntroGreeting({ onComplete }) {
+
+
+export function IntroGreeting({ onComplete }) {
   const [index, setIndex] = React.useState(0);
   const [exiting, setExiting] = React.useState(false);
 
   React.useEffect(() => {
     if (index >= GREETINGS.length - 1) {
-      const exitTimer = setTimeout(() => setExiting(true), PER_WORD_MS + 250);
+      const exitTimer = setTimeout(() => setExiting(true), PER_WORD_MS + 200);
       const doneTimer = setTimeout(
         () => onComplete && onComplete(),
-        PER_WORD_MS + 900,
+        PER_WORD_MS + 1100, // Syncs flawlessly with the high-end cubic-bezier exit
       );
       return () => {
         clearTimeout(exitTimer);
@@ -1178,72 +1180,157 @@ function IntroGreeting({ onComplete }) {
 
   const skip = () => {
     setExiting(true);
-    setTimeout(() => onComplete && onComplete(), 500);
+    setTimeout(() => onComplete && onComplete(), 900);
   };
 
   const current = GREETINGS[index];
+  const letters = current.text.split("");
+
+  // Premium High-Performance Animation Variants
+  const containerVariants = {
+    initial: {},
+    animate: {
+      transition: { staggerChildren: 0.04 }
+    },
+    exit: {
+      transition: { staggerChildren: 0.02, staggerDirection: -1 }
+    }
+  };
+
+  const letterVariants = {
+    initial: {
+      opacity: 0,
+      y: 60,
+      rotateX: 75,
+      scale: 0.8,
+      filter: "blur(8px)",
+    },
+    animate: {
+      opacity: 1,
+      y: 0,
+      rotateX: 0,
+      scale: 1,
+      filter: "blur(0px)",
+      transition: {
+        type: "spring",
+        stiffness: 150,
+        damping: 18,
+      }
+    },
+    exit: {
+      opacity: 0,
+      y: -50,
+      rotateX: -45,
+      filter: "blur(6px)",
+      transition: { duration: 0.3, ease: [0.33, 1, 0.68, 1] }
+    }
+  };
 
   return (
     <AnimatePresence>
       {!exiting && (
         <motion.div
           key="intro-root"
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.5, ease: "easeInOut" }}
-          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-neutral-950"
+          initial={{ y: "0%" }}
+          exit={{ y: "-100%" }}
+          transition={{ duration: 1, ease: [0.85, 0, 0.15, 1] }} // Signature premium slow-to-fast curve
+          className="fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-[#070708] origin-top select-none overflow-hidden"
+          style={{ perspective: "1200px" }}
         >
-          <div className="absolute top-8 left-1/2 -translate-x-1/2 flex gap-1.5">
+          {/* PREMIUM FEATURE: Ambient Morphing Backdrop Lights */}
+          <div className="absolute inset-0 overflow-hidden opacity-30 pointer-events-none mix-blend-screen">
+            <motion.div 
+              animate={{
+                scale: [1, 1.2, 0.9, 1],
+                x: ['-10%', '15%', '-5%', '-10%'],
+                y: ['5%', '-10%', '12%', '5%'],
+              }}
+              transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute -top-12 left-1/4 w-[45vw] h-[45vw] rounded-full bg-gradient-to-br from-indigo-600 via-purple-600 to-transparent filter blur-[100px]"
+            />
+            <motion.div 
+              animate={{
+                scale: [1.1, 0.85, 1.2, 1.1],
+                x: ['10%', '-12%', '5%', '10%'],
+                y: ['-5%', '15%', '-8%', '-5%'],
+              }}
+              transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute -bottom-12 right-1/4 w-[40vw] h-[40vw] rounded-full bg-gradient-to-tr from-cyan-500 via-emerald-500 to-transparent filter blur-[110px]"
+            />
+          </div>
+
+          {/* Luxury Micro-Stepped Progress Tracker */}
+          <div className="absolute top-12 left-1/2 -translate-x-1/2 flex items-center gap-3">
             {GREETINGS.map((g, i) => (
-              <span
-                key={g.lang}
-                className="h-1 w-1 rounded-full transition-colors duration-300"
-                style={{
-                  backgroundColor:
-                    i <= index ? "#fff" : "rgba(255,255,255,0.2)",
-                }}
-              />
+              <div key={g.lang} className="relative h-[2px] w-6 bg-white/10 overflow-hidden rounded-full">
+                <motion.div 
+                  initial={{ width: "0%" }}
+                  animate={{ width: i < index ? "100%" : i === index ? "100%" : "0%" }}
+                  transition={{ 
+                    duration: i === index ? PER_WORD_MS / 1000 : 0.2, 
+                    ease: "linear" 
+                  }}
+                  className="absolute left-0 top-0 h-full bg-gradient-to-r from-cyan-400 to-purple-500 origin-left"
+                />
+              </div>
             ))}
           </div>
 
-          <div className="relative h-28 flex items-center justify-center px-6">
+          {/* High-Definition Typography Window */}
+          <div className="relative h-44 flex flex-col items-center justify-center px-8 z-10">
             <AnimatePresence mode="wait">
               <motion.div
                 key={current.text}
-                initial={{
-                  opacity: 0,
-                  y: 24,
-                  scale: 0.92,
-                  filter: "blur(6px)",
-                }}
-                animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-                exit={{ opacity: 0, y: -24, scale: 0.92, filter: "blur(6px)" }}
-                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                className="text-center"
+                variants={containerVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                className="flex flex-wrap justify-center text-center font-bold tracking-tight select-none"
               >
-                <p
-                  className="text-white font-bold tracking-tight leading-none"
-                  style={{
-                    fontSize: "clamp(2.5rem, 9vw, 6rem)",
-                    fontFamily: "'Space Grotesk', sans-serif",
-                  }}
-                >
-                  {current.text}
-                </p>
-                <p className="mt-3 text-xs uppercase tracking-[0.25em] text-neutral-500">
-                  {current.lang}
-                </p>
+                {letters.map((char, i) => (
+                  <motion.span
+                    key={`${char}-${i}`}
+                    variants={letterVariants}
+                    style={{
+                      display: "inline-block",
+                      fontSize: "clamp(3rem, 11vw, 7.5rem)",
+                      fontFamily: "'Space Grotesk', sans-serif",
+                      transformOrigin: "center center -30px", // Pushes 3D rotation pivot backwards
+                    }}
+                    className="text-transparent bg-clip-text bg-gradient-to-b from-white via-neutral-100 to-neutral-400 leading-none pb-2"
+                  >
+                    {char === " " ? "\u00A0" : char}
+                  </motion.span>
+                ))}
               </motion.div>
+            </AnimatePresence>
+
+            {/* Sub-label Metadata */}
+            <AnimatePresence mode="wait">
+              <motion.p
+                key={`lang-${current.lang}`}
+                initial={{ opacity: 0, scale: 0.95, letterSpacing: "0.2em" }}
+                animate={{ opacity: 1, scale: 1, letterSpacing: "0.35em" }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.4 }}
+                className="mt-6 text-[10px] uppercase font-semibold text-neutral-500 tracking-[0.35em]"
+              >
+                {current.lang}
+              </motion.p>
             </AnimatePresence>
           </div>
 
+          {/* Signature Action Button */}
           <motion.button
             onClick={skip}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6 }}
-            className="absolute bottom-8 text-xs text-neutral-500 hover:text-white tracking-wide transition-colors"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.98 }}
+            className="absolute bottom-12 px-5 py-2 text-[11px] font-medium text-neutral-500 hover:text-white border border-neutral-800 hover:border-neutral-700 bg-neutral-900/40 backdrop-blur-md rounded-full tracking-widest uppercase transition-all duration-300"
           >
-            Skip →
+            Skip Intro
           </motion.button>
         </motion.div>
       )}
