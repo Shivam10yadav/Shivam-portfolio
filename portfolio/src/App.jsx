@@ -26,6 +26,7 @@ import {
   FaCode,
   FaPenNib,
   FaLightbulb,
+  FaInstagram,
 } from "react-icons/fa";
 import {
   SiAegisauthenticator,
@@ -51,6 +52,7 @@ import {
   SiVercel,
   SiVisualparadigm,
 } from "react-icons/si";
+import Footer from "./components/Footer";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -273,11 +275,11 @@ function ProjectCard({
 function FloatingDock({ theme, toggleTheme }) {
   const links = [
     { Icon: FaHome, label: "Home", href: "#" },
-    { Icon: FaBook, label: "Resume", href: "#" },
-    { Icon: FaGithub, label: "GitHub", href: "#" },
-    { Icon: FaLinkedin, label: "LinkedIn", href: "#" },
-    { Icon: FaTwitter, label: "X", href: "#" },
-    { Icon: FaYoutube, label: "YouTube", href: "#" },
+    { Icon: FaBook, label: "Resume", href: "#resume" },
+    { Icon: FaGithub, label: "GitHub", href: "https://github.com/Shivam10yadav/" },
+    { Icon: FaLinkedin, label: "LinkedIn", href: "https://www.linkedin.com/in/shivam10yadav/" },
+    { Icon: FaTwitter, label: "X", href: "https://x.com/Y80Shivam" },
+    { Icon: FaInstagram, label: "Instagram", href: "https://www.instagram.com/shivam05_10/" },
   ];
 
   return (
@@ -499,6 +501,33 @@ function Portfolio({ theme, toggleTheme }) {
         "Deployed and maintained applications on Vercel and Render with production-ready environments.",
     },
   ];
+
+  const journey = [
+  {
+    year: "2023",
+    title: "Started My Development Journey",
+    description:
+      "Started my BCA and explored programming fundamentals. Learned HTML, CSS, JavaScript, and built my first responsive web pages while discovering my passion for web development.",
+  },
+  {
+    year: "2024",
+    title: "Learning Full-Stack Development",
+    description:
+      "Focused on React, Node.js, Express, and MongoDB. Built full-stack projects, learned REST APIs, authentication, database design, and strengthened my understanding of modern web development.",
+  },
+  {
+    year: "2025",
+    title: "Building & Deploying Real-World Applications",
+    description:
+      "Shifted from tutorial projects to production-style applications like QueueLess, ParkFlow, and Reverto. Learned deployment using platforms like Vercel and Render, managed environment variables, and improved application performance and scalability.",
+  },
+  {
+    year: "2026",
+    title: "Ready for My First Developer Role",
+    description:
+      "Graduating with a portfolio of deployed full-stack applications, continuously learning system design, performance optimization, and best development practices while actively seeking opportunities as a Software Developer.",
+  },
+];
 
   const developmentProcess = [
     {
@@ -875,13 +904,67 @@ function Portfolio({ theme, toggleTheme }) {
           </div>
         </Section>
 
+{/* journey */}
+
+      <Section
+  id="journey"
+  title="My Journey"
+  subtitle="Every year brought new challenges, skills, and milestones."
+  index={4}
+>
+  <div className="relative mx-auto max-w-4xl">
+
+    {/* Timeline */}
+    <div className="absolute left-8 top-0 h-full w-px bg-gradient-to-b from-neutral-300 via-neutral-200 to-transparent dark:from-neutral-700 dark:via-neutral-800" />
+
+    {journey.map((item, i) => (
+      <motion.div
+        key={item.year}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true }}
+        variants={fadeUp}
+        className="relative flex gap-8 pb-16 last:pb-0"
+      >
+        {/* Dot */}
+        <div className="relative z-10 flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-xl">
+          <span className="text-sm font-bold">
+            {item.year.slice(2)}
+          </span>
+        </div>
+
+        {/* Card */}
+        <motion.div
+          whileHover={{ y: -6 }}
+          className="flex-1 rounded-3xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-7 transition-all duration-300 hover:shadow-2xl"
+        >
+          <span className="text-xs uppercase tracking-[0.25em] text-neutral-400">
+            {item.year}
+          </span>
+
+          <h3
+            className="mt-3 text-2xl font-semibold"
+            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+          >
+            {item.title}
+          </h3>
+
+          <p className="mt-4 leading-8 text-neutral-500 dark:text-neutral-400">
+            {item.description}
+          </p>
+        </motion.div>
+      </motion.div>
+    ))}
+  </div>
+</Section>
+
         {/* process */}
 
         <Section
           id="process"
           title="Development Process"
           subtitle="My approach to building reliable web applications."
-          index={4}
+          index={5}
         >
           <div className="space-y-6">
             {developmentProcess.map((step, i) => (
@@ -934,7 +1017,7 @@ function Portfolio({ theme, toggleTheme }) {
           id="toolbox"
           title="Toolbox"
           subtitle="The tools I use to design, build, test and deploy applications."
-          index={5}
+          index={6}
         >
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {toolbox.map((tool, i) => (
@@ -978,7 +1061,7 @@ function Portfolio({ theme, toggleTheme }) {
           id="education"
           title="Education"
           subtitle="My academic journey."
-          index={6}
+          index={7}
         >
           <div className="relative border-l-2 border-neutral-200 dark:border-neutral-800 ml-4 space-y-10">
             {education.map((e, i) => (
@@ -1026,7 +1109,7 @@ function Portfolio({ theme, toggleTheme }) {
           id="achievements"
           title="Highlights"
           subtitle="Highlights from my journey as a developer."
-          index={7}
+          index={8}
         >
           <div className="space-y-5">
             {achievements.map((a, i) => (
@@ -1067,6 +1150,8 @@ function Portfolio({ theme, toggleTheme }) {
           </div>
         </Section>
 
+
+{/* conatct */}
         <motion.section
           id="contact"
           className="mt-14"
@@ -1107,28 +1192,28 @@ function Portfolio({ theme, toggleTheme }) {
 
               <div className="flex items-center justify-center gap-5 mt-8">
                 <a
-                  href="#"
+                  href="https://github.com/Shivam10yadav/"
                   aria-label="GitHub"
                   className="text-neutral-400 hover:text-white transition-colors"
                 >
                   <FaGithub size={20} />
                 </a>
                 <a
-                  href="#"
+                  href="https://www.linkedin.com/in/shivam10yadav/"
                   aria-label="LinkedIn"
                   className="text-neutral-400 hover:text-white transition-colors"
                 >
                   <FaLinkedin size={20} />
                 </a>
                 <a
-                  href="#"
+                  href="https://x.com/Y80Shivam"
                   aria-label="X"
                   className="text-neutral-400 hover:text-white transition-colors"
                 >
                   <FaTwitter size={20} />
                 </a>
                 <a
-                  href="#"
+                  href="/resume.pdf"
                   aria-label="Resume"
                   className="text-neutral-400 hover:text-white transition-colors"
                 >
@@ -1139,12 +1224,14 @@ function Portfolio({ theme, toggleTheme }) {
           </div>
         </motion.section>
 
-        <div className="h-28" />
       </div>
+      <Footer/>
       <FloatingDock theme={theme} toggleTheme={toggleTheme} />
-    </div>
+    </div>  
   );
 }
+
+
 
 const GREETINGS = [
   { text: "नमस्ते", lang: "Hindi" },
