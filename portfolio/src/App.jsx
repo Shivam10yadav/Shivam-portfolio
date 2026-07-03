@@ -960,100 +960,162 @@ function Portfolio({ theme, toggleTheme }) {
 
         {/* process */}
 
-        <Section
-          id="process"
-          title="Development Process"
-          subtitle="My approach to building reliable web applications."
-          index={5}
+ <Section
+  id="process"
+  title="Development Process"
+  subtitle="How I transform ideas into production-ready applications."
+  index={5}
+>
+  <div className="relative mx-auto max-w-5xl">
+
+    {/* Timeline */}
+    <div className="absolute left-8 top-10 bottom-10 w-px bg-gradient-to-b from-neutral-300 via-neutral-200 to-transparent dark:from-neutral-700 dark:via-neutral-800" />
+
+    {developmentProcess.map((step, i) => (
+      <motion.div
+        key={step.title}
+        custom={i}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true }}
+        variants={fadeUp}
+        className="relative flex gap-8 pb-12 last:pb-0"
+      >
+        {/* Icon Circle */}
+        <motion.div
+          whileHover={{
+            scale: 1.15,
+            rotate: 8,
+          }}
+          className="relative z-10 flex h-16 w-16 shrink-0 items-center justify-center rounded-full
+          bg-neutral-900 text-white
+          dark:bg-white dark:text-neutral-900
+          shadow-xl"
         >
-          <div className="space-y-6">
-            {developmentProcess.map((step, i) => (
-              <motion.div
-                key={step.title}
-                custom={i}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true }}
-                variants={fadeUp}
-                whileHover={{ x: 8 }}
-                className="group border-b border-neutral-200 dark:border-neutral-800 pb-6 last:border-none"
-              >
-                <div className="flex items-start gap-6">
-                  <span
-                    className="text-5xl font-bold text-neutral-200 dark:text-neutral-800 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors"
-                    style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-                  >
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
+          <step.icon size={24} />
+        </motion.div>
 
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3">
-                      <step.icon
-                        size={20}
-                        className="text-neutral-500 dark:text-neutral-400 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors"
-                      />
+        {/* Card */}
+        <motion.div
+          whileHover={{
+            y: -8,
+            scale: 1.01,
+          }}
+          transition={{ type: "spring", stiffness: 250 }}
+          className="relative flex-1 overflow-hidden rounded-3xl
+          border border-neutral-200 dark:border-neutral-800
+          bg-white/70 dark:bg-neutral-900/70
+          backdrop-blur-xl
+          p-8 shadow-sm transition-all"
+        >
+          {/* Huge Watermark */}
+          <span
+            className="absolute right-6 top-2 text-7xl font-black
+            text-neutral-100 dark:text-neutral-800 select-none"
+            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+          >
+            {String(i + 1).padStart(2, "0")}
+          </span>
 
-                      <h3
-                        className="text-xl font-semibold text-neutral-900 dark:text-white"
-                        style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-                      >
-                        {step.title}
-                      </h3>
-                    </div>
+          <h3
+            className="text-2xl font-semibold text-neutral-900 dark:text-white"
+            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+          >
+            {step.title}
+          </h3>
 
-                    <p className="mt-3 text-neutral-500 dark:text-neutral-400 leading-relaxed max-w-2xl">
-                      {step.description}
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+          <p className="mt-4 max-w-2xl leading-8 text-neutral-500 dark:text-neutral-400">
+            {step.description}
+          </p>
+
+          {/* Progress Line */}
+          <div className="mt-6 h-1 w-24 rounded-full bg-neutral-200 dark:bg-neutral-800 overflow-hidden">
+            <motion.div
+              initial={{ width: 0 }}
+              whileInView={{ width: "100%" }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2, duration: 0.8 }}
+              className="h-full bg-neutral-900 dark:bg-white"
+            />
           </div>
-        </Section>
+        </motion.div>
+      </motion.div>
+    ))}
+  </div>
+</Section>
 
         {/* toolbox */}
+<Section
+  id="toolbox"
+  title="Toolbox"
+  subtitle="Technologies I use to design, build, test and deploy modern web applications."
+  index={6}
+>
+  <div className="flex flex-wrap justify-center gap-5">
+    {toolbox.map((tool, i) => (
+      <motion.div
+        key={tool.title}
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{
+          delay: i * 0.08,
+          duration: 0.5,
+        }}
+        animate={{
+          y: [0, -6, 0],
+        }}
+        whileHover={{
+          scale: 1.08,
+          rotate: i % 2 === 0 ? -4 : 4,
+          y: -10,
+        }}
+        transition={{
+          y: {
+            duration: 3 + (i % 3),
+            repeat: Infinity,
+            ease: "easeInOut",
+          },
+        }}
+        className={`group relative flex w-[170px] flex-col items-center rounded-3xl border
+        border-neutral-200 dark:border-neutral-800
+        bg-white dark:bg-neutral-900
+        px-6 py-7 shadow-sm transition-all hover:shadow-xl
+        ${
+          i % 3 === 1
+            ? "mt-8"
+            : i % 3 === 2
+            ? "mt-16"
+            : ""
+        }`}
+      >
+        {/* Glow */}
+        <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-blue-500/0 via-violet-500/0 to-cyan-500/0 opacity-0 blur-xl transition-all duration-500 group-hover:from-blue-500/10 group-hover:via-violet-500/10 group-hover:to-cyan-500/10 group-hover:opacity-100" />
 
-        <Section
-          id="toolbox"
-          title="Toolbox"
-          subtitle="The tools I use to design, build, test and deploy applications."
-          index={6}
+        {/* Icon */}
+        <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-neutral-100 dark:bg-neutral-800 transition-transform duration-300 group-hover:rotate-6 group-hover:scale-110">
+          <tool.icon
+            size={30}
+            className="text-neutral-900 dark:text-white"
+          />
+        </div>
+
+        {/* Name */}
+        <h3
+          className="relative mt-5 text-lg font-semibold text-neutral-900 dark:text-white"
+          style={{ fontFamily: "'Space Grotesk', sans-serif" }}
         >
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {toolbox.map((tool, i) => (
-              <motion.div
-                key={tool.title}
-                custom={i}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true }}
-                variants={fadeUp}
-                whileHover={{
-                  y: -5,
-                  scale: 1.03,
-                }}
-                transition={{ type: "spring", stiffness: 300 }}
-                className="group rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-5 hover:border-neutral-900 dark:hover:border-white transition-all"
-              >
-                <tool.icon
-                  size={34}
-                  className="text-neutral-700 dark:text-neutral-300 group-hover:text-black dark:group-hover:text-white transition-colors"
-                />
+          {tool.title}
+        </h3>
 
-                <h3
-                  className="mt-5 font-semibold text-neutral-900 dark:text-white"
-                  style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-                >
-                  {tool.title}
-                </h3>
-
-                <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-                  {tool.description}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-        </Section>
+        {/* Description */}
+        <p className="relative mt-2 text-center text-sm leading-6 text-neutral-500 dark:text-neutral-400">
+          {tool.description}
+        </p>
+      </motion.div>
+    ))}
+  </div>
+</Section>
 
         {/* education */}
 
@@ -1243,8 +1305,6 @@ const GREETINGS = [
 
 const PER_WORD_MS = 1000;
 
-
-
 export function IntroGreeting({ onComplete }) {
   const [index, setIndex] = React.useState(0);
   const [exiting, setExiting] = React.useState(false);
@@ -1254,7 +1314,7 @@ export function IntroGreeting({ onComplete }) {
       const exitTimer = setTimeout(() => setExiting(true), PER_WORD_MS + 200);
       const doneTimer = setTimeout(
         () => onComplete && onComplete(),
-        PER_WORD_MS + 1100, // Syncs flawlessly with the high-end cubic-bezier exit
+        PER_WORD_MS + 1100,
       );
       return () => {
         clearTimeout(exitTimer);
@@ -1273,44 +1333,26 @@ export function IntroGreeting({ onComplete }) {
   const current = GREETINGS[index];
   const letters = current.text.split("");
 
-  // Premium High-Performance Animation Variants
   const containerVariants = {
     initial: {},
-    animate: {
-      transition: { staggerChildren: 0.04 }
-    },
-    exit: {
-      transition: { staggerChildren: 0.02, staggerDirection: -1 }
-    }
+    animate: { transition: { staggerChildren: 0.045 } },
+    exit: { transition: { staggerChildren: 0.02, staggerDirection: -1 } },
   };
 
   const letterVariants = {
-    initial: {
-      opacity: 0,
-      y: 60,
-      rotateX: 75,
-      scale: 0.8,
-      filter: "blur(8px)",
-    },
+    initial: { opacity: 0, y: 40, filter: "blur(6px)" },
     animate: {
       opacity: 1,
       y: 0,
-      rotateX: 0,
-      scale: 1,
       filter: "blur(0px)",
-      transition: {
-        type: "spring",
-        stiffness: 150,
-        damping: 18,
-      }
+      transition: { type: "spring", stiffness: 170, damping: 20 },
     },
     exit: {
       opacity: 0,
-      y: -50,
-      rotateX: -45,
-      filter: "blur(6px)",
-      transition: { duration: 0.3, ease: [0.33, 1, 0.68, 1] }
-    }
+      y: -24,
+      filter: "blur(4px)",
+      transition: { duration: 0.3, ease: [0.33, 1, 0.68, 1] },
+    },
   };
 
   return (
@@ -1320,50 +1362,53 @@ export function IntroGreeting({ onComplete }) {
           key="intro-root"
           initial={{ y: "0%" }}
           exit={{ y: "-100%" }}
-          transition={{ duration: 1, ease: [0.85, 0, 0.15, 1] }} // Signature premium slow-to-fast curve
-          className="fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-[#070708] origin-top select-none overflow-hidden"
-          style={{ perspective: "1200px" }}
+          transition={{ duration: 1, ease: [0.85, 0, 0.15, 1] }}
+          className="fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-[#0A0A0A] origin-top select-none overflow-hidden"
         >
-          {/* PREMIUM FEATURE: Ambient Morphing Backdrop Lights */}
-          <div className="absolute inset-0 overflow-hidden opacity-30 pointer-events-none mix-blend-screen">
-            <motion.div 
-              animate={{
-                scale: [1, 1.2, 0.9, 1],
-                x: ['-10%', '15%', '-5%', '-10%'],
-                y: ['5%', '-10%', '12%', '5%'],
-              }}
-              transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute -top-12 left-1/4 w-[45vw] h-[45vw] rounded-full bg-gradient-to-br from-indigo-600 via-purple-600 to-transparent filter blur-[100px]"
-            />
-            <motion.div 
-              animate={{
-                scale: [1.1, 0.85, 1.2, 1.1],
-                x: ['10%', '-12%', '5%', '10%'],
-                y: ['-5%', '15%', '-8%', '-5%'],
-              }}
-              transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute -bottom-12 right-1/4 w-[40vw] h-[40vw] rounded-full bg-gradient-to-tr from-cyan-500 via-emerald-500 to-transparent filter blur-[110px]"
-            />
-          </div>
+          {/* Film grain */}
+          <svg className="absolute inset-0 w-full h-full opacity-[0.05] pointer-events-none mix-blend-overlay">
+            <filter id="grain">
+              <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch" />
+            </filter>
+            <rect width="100%" height="100%" filter="url(#grain)" />
+          </svg>
 
-          {/* Luxury Micro-Stepped Progress Tracker */}
-          <div className="absolute top-12 left-1/2 -translate-x-1/2 flex items-center gap-3">
+          {/* Breathing spotlight */}
+          <motion.div
+            animate={{ opacity: [0.5, 0.85, 0.5], scale: [1, 1.08, 1] }}
+            transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute w-[36rem] h-[36rem] rounded-full pointer-events-none"
+            style={{
+              background:
+                "radial-gradient(circle, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.02) 45%, transparent 70%)",
+            }}
+          />
+
+          {/* Corner registration marks */}
+          {[
+            "top-6 left-6 border-t border-l",
+            "top-6 right-6 border-t border-r",
+            "bottom-6 left-6 border-b border-l",
+            "bottom-6 right-6 border-b border-r",
+          ].map((pos) => (
+            <div key={pos} className={`absolute ${pos} w-4 h-4 border-[#FAFAF8]/20`} />
+          ))}
+
+          {/* Progress tracker */}
+          <div className="absolute top-10 left-1/2 -translate-x-1/2 flex items-center gap-2.5">
             {GREETINGS.map((g, i) => (
-              <div key={g.lang} className="relative h-[2px] w-6 bg-white/10 overflow-hidden rounded-full">
-                <motion.div 
+              <div key={g.lang} className="relative h-[1.5px] w-5 bg-[#FAFAF8]/10 overflow-hidden">
+                <motion.div
                   initial={{ width: "0%" }}
                   animate={{ width: i < index ? "100%" : i === index ? "100%" : "0%" }}
-                  transition={{ 
-                    duration: i === index ? PER_WORD_MS / 1000 : 0.2, 
-                    ease: "linear" 
-                  }}
-                  className="absolute left-0 top-0 h-full bg-gradient-to-r from-cyan-400 to-purple-500 origin-left"
+                  transition={{ duration: i === index ? PER_WORD_MS / 1000 : 0.2, ease: "linear" }}
+                  className="absolute left-0 top-0 h-full bg-[#FAFAF8]/80"
                 />
               </div>
             ))}
           </div>
 
-          {/* High-Definition Typography Window */}
+          {/* Typography */}
           <div className="relative h-44 flex flex-col items-center justify-center px-8 z-10">
             <AnimatePresence mode="wait">
               <motion.div
@@ -1372,7 +1417,7 @@ export function IntroGreeting({ onComplete }) {
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                className="flex flex-wrap justify-center text-center font-bold tracking-tight select-none"
+                className="flex flex-wrap justify-center text-center font-medium tracking-tight"
               >
                 {letters.map((char, i) => (
                   <motion.span
@@ -1380,11 +1425,10 @@ export function IntroGreeting({ onComplete }) {
                     variants={letterVariants}
                     style={{
                       display: "inline-block",
-                      fontSize: "clamp(3rem, 11vw, 7.5rem)",
-                      fontFamily: "'Space Grotesk', sans-serif",
-                      transformOrigin: "center center -30px", // Pushes 3D rotation pivot backwards
+                      fontSize: "clamp(3rem, 10vw, 6.5rem)",
+                      fontFamily: "'Space Grotesk', 'Noto Sans', sans-serif",
                     }}
-                    className="text-transparent bg-clip-text bg-gradient-to-b from-white via-neutral-100 to-neutral-400 leading-none pb-2"
+                    className="text-[#FAFAF8] leading-none pb-2"
                   >
                     {char === " " ? "\u00A0" : char}
                   </motion.span>
@@ -1392,30 +1436,32 @@ export function IntroGreeting({ onComplete }) {
               </motion.div>
             </AnimatePresence>
 
-            {/* Sub-label Metadata */}
             <AnimatePresence mode="wait">
-              <motion.p
+              <motion.div
                 key={`lang-${current.lang}`}
-                initial={{ opacity: 0, scale: 0.95, letterSpacing: "0.2em" }}
-                animate={{ opacity: 1, scale: 1, letterSpacing: "0.35em" }}
-                exit={{ opacity: 0, scale: 0.95 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 transition={{ duration: 0.4 }}
-                className="mt-6 text-[10px] uppercase font-semibold text-neutral-500 tracking-[0.35em]"
+                className="mt-6 flex items-center gap-3"
               >
-                {current.lang}
-              </motion.p>
+                <span className="w-6 h-px bg-[#FAFAF8]/25" />
+                <p className="text-[10px] uppercase font-medium text-[#8A8A8A] tracking-[0.35em]">
+                  {current.lang}
+                </p>
+                <span className="w-6 h-px bg-[#FAFAF8]/25" />
+              </motion.div>
             </AnimatePresence>
           </div>
 
-          {/* Signature Action Button */}
+          {/* Skip */}
           <motion.button
             onClick={skip}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.98 }}
-            className="absolute bottom-12 px-5 py-2 text-[11px] font-medium text-neutral-500 hover:text-white border border-neutral-800 hover:border-neutral-700 bg-neutral-900/40 backdrop-blur-md rounded-full tracking-widest uppercase transition-all duration-300"
+            whileHover={{ opacity: 1, borderColor: "rgba(250,250,248,0.4)" }}
+            className="absolute bottom-12 px-5 py-2 text-[11px] font-medium text-[#8A8A8A] hover:text-[#FAFAF8] border border-[#FAFAF8]/15 rounded-full tracking-widest uppercase transition-colors duration-300"
           >
             Skip Intro
           </motion.button>
