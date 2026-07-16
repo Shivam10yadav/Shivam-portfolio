@@ -1,5 +1,11 @@
-import React from "react";
-import { motion, AnimatePresence, useScroll, useSpring } from "framer-motion";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  motion,
+  AnimatePresence,
+  useScroll,
+  useSpring,
+  useMotionValue,
+} from "framer-motion";
 import {
   FaHome,
   FaBook,
@@ -32,12 +38,14 @@ import {
   SiAegisauthenticator,
   SiAuth0,
   SiAxios,
+  SiDocker,
   SiExpress,
   SiFigma,
   SiFirebase,
   SiFramer,
   SiGit,
   SiGithub,
+  SiGithubactions,
   SiJavascript,
   SiMongodb,
   SiMysql,
@@ -146,21 +154,55 @@ function Row({ logo, color, title, subtitle, period }, i) {
   );
 }
 
-function SkillPill({ Icon, label }, i) {
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.04,
+    },
+  },
+};
+
+const pillVariants = {
+  hidden: { opacity: 0, y: 15, scale: 0.95 },
+  show: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      type: "spring",
+      stiffness: 100,
+      damping: 15,
+    },
+  },
+}
+function SkillPill({ Icon, label }) {
   return (
-    <motion.span
-      key={label}
-      custom={i}
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true }}
-      variants={fadeUp}
-      whileHover={{ y: -2, scale: 1.03 }}
-      className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3.5 py-1.5 text-sm text-neutral-700 dark:text-neutral-200 shadow-sm"
+    <motion.div
+      variants={pillVariants}
+      whileHover={{ 
+        y: -3, 
+        scale: 1.02,
+        backgroundColor: "rgba(255, 255, 255, 0.04)"
+      }}
+      whileTap={{ scale: 0.98 }}
+      className="group relative inline-flex items-center gap-2.5 rounded-xl border border-neutral-200/80 dark:border-white/[0.06] bg-white dark:bg-[#0E0E10] px-4 py-2 text-sm font-medium text-neutral-800 dark:text-neutral-200 transition-colors duration-300 shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-none overflow-hidden cursor-default"
     >
-      <Icon size={15} className="text-neutral-500 dark:text-neutral-400" />
-      {label}
-    </motion.span>
+      {/* Premium Subtle Ambient Radial Glow Effect on Hover */}
+      <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.08)_0%,transparent_75%)] pointer-events-none" />
+      
+      {/* Dynamic Scaling Brand Icon */}
+      {Icon && (
+        <Icon 
+          size={16} 
+          className="text-neutral-500 dark:text-white/40 group-hover:text-neutral-900 dark:group-hover:text-white group-hover:scale-110 transition-all duration-300 ease-out" 
+        />
+      )}
+      
+      <span className="tracking-wide dark:font-light">{label}</span>
+    </motion.div>
   );
 }
 
@@ -276,10 +318,22 @@ function FloatingDock({ theme, toggleTheme }) {
   const links = [
     { Icon: FaHome, label: "Home", href: "#" },
     { Icon: FaBook, label: "Resume", href: "#resume" },
-    { Icon: FaGithub, label: "GitHub", href: "https://github.com/Shivam10yadav/" },
-    { Icon: FaLinkedin, label: "LinkedIn", href: "https://www.linkedin.com/in/shivam10yadav/" },
+    {
+      Icon: FaGithub,
+      label: "GitHub",
+      href: "https://github.com/Shivam10yadav/",
+    },
+    {
+      Icon: FaLinkedin,
+      label: "LinkedIn",
+      href: "https://www.linkedin.com/in/shivam10yadav/",
+    },
     { Icon: FaTwitter, label: "X", href: "https://x.com/Y80Shivam" },
-    { Icon: FaInstagram, label: "Instagram", href: "https://www.instagram.com/shivam05_10/" },
+    {
+      Icon: FaInstagram,
+      label: "Instagram",
+      href: "https://www.instagram.com/shivam05_10/",
+    },
   ];
 
   return (
@@ -325,29 +379,33 @@ function Portfolio({ theme, toggleTheme }) {
   const tagline =
     "I design and build fast, scalable, and user-centric web applications with a strong focus on clean architecture, responsive interfaces, and exceptional user experience.";
 
-  const skills = [
-    { Icon: FaReact, label: "React" },
-    { Icon: SiJavascript, label: "JavaScript" },
-    { Icon: FaHtml5, label: "HTML & CSS" },
-    { Icon: SiTailwindcss, label: "Tailwind CSS" },
-    { Icon: FaNodeJs, label: "Node.js" },
-    { Icon: FaPython, label: "Python" },
-    { Icon: SiMysql, label: "MySQL" },
-    { Icon: SiRedux, label: "Redux" },
-    { Icon: SiGit, label: "Git" },
-    { Icon: SiGithub, label: "Github" },
-    { Icon: FaServer, label: "REST APIs" },
-    { Icon: SiMongodb, label: "MongoDB" },
-    { Icon: SiExpress, label: "Express.Js" },
-    { Icon: SiSecurityscorecard, label: "Jwt Authentication " },
-    { Icon: SiFramer, label: "Framer-Motion " },
-    { Icon: SiFirebase, label: "Firebase " },
-    { Icon: SiVercel, label: "Vercel " },
-    { Icon: SiRender, label: "Render " },
-    { Icon: SiAxios, label: "Axios " },
-    { Icon: SiSocketdotio, label: "Socket.Io " },
-    { Icon: SiReactrouter, label: "React Router " },
-  ];
+const SKILLS = [
+  { Icon: FaReact, label: "React" },
+  { Icon: SiJavascript, label: "JavaScript" },
+  { Icon: FaHtml5, label: "HTML & CSS" },
+  { Icon: SiTailwindcss, label: "Tailwind CSS" },
+  { Icon: FaNodeJs, label: "Node.js" },
+  { Icon: FaPython, label: "Python" },
+  { Icon: SiMysql, label: "MySQL" },
+  { Icon: SiRedux, label: "Redux" },
+  { Icon: SiGit, label: "Git" },
+  { Icon: SiGithub, label: "GitHub" },
+  { Icon: SiGithubactions, label: "GitHubActions" },
+  { Icon: SiDocker, label: "Docker" },
+  { Icon: FaServer, label: "REST APIs" },
+  { Icon: SiMongodb, label: "MongoDB" },
+  { Icon: SiExpress, label: "Express.js" },
+  { Icon: SiSecurityscorecard, label: "JWT Authentication" },
+  { Icon: SiFramer, label: "Framer Motion" },
+  { Icon: SiFirebase, label: "Firebase" },
+  { Icon: SiVercel, label: "Vercel" },
+  { Icon: SiRender, label: "Render" },
+  { Icon: SiAxios, label: "Axios" },
+  { Icon: SiSocketdotio, label: "Socket.io" },
+  { Icon: SiReactrouter, label: "React Router" },
+];
+
+
 
   const projects = [
     {
@@ -503,31 +561,31 @@ function Portfolio({ theme, toggleTheme }) {
   ];
 
   const journey = [
-  {
-    year: "2023",
-    title: "Started My Development Journey",
-    description:
-      "Started my BCA and explored programming fundamentals. Learned HTML, CSS, JavaScript, and built my first responsive web pages while discovering my passion for web development.",
-  },
-  {
-    year: "2024",
-    title: "Learning Full-Stack Development",
-    description:
-      "Focused on React, Node.js, Express, and MongoDB. Built full-stack projects, learned REST APIs, authentication, database design, and strengthened my understanding of modern web development.",
-  },
-  {
-    year: "2025",
-    title: "Building & Deploying Real-World Applications",
-    description:
-      "Shifted from tutorial projects to production-style applications like QueueLess, ParkFlow, and Reverto. Learned deployment using platforms like Vercel and Render, managed environment variables, and improved application performance and scalability.",
-  },
-  {
-    year: "2026",
-    title: "Ready for My First Developer Role",
-    description:
-      "Graduating with a portfolio of deployed full-stack applications, continuously learning system design, performance optimization, and best development practices while actively seeking opportunities as a Software Developer.",
-  },
-];
+    {
+      year: "2023",
+      title: "Started My Development Journey",
+      description:
+        "Started my BCA and explored programming fundamentals. Learned HTML, CSS, JavaScript, and built my first responsive web pages while discovering my passion for web development.",
+    },
+    {
+      year: "2024",
+      title: "Learning Full-Stack Development",
+      description:
+        "Focused on React, Node.js, Express, and MongoDB. Built full-stack projects, learned REST APIs, authentication, database design, and strengthened my understanding of modern web development.",
+    },
+    {
+      year: "2025",
+      title: "Building & Deploying Real-World Applications",
+      description:
+        "Shifted from tutorial projects to production-style applications like QueueLess, ParkFlow, and Reverto. Learned deployment using platforms like Vercel and Render, managed environment variables, and improved application performance and scalability.",
+    },
+    {
+      year: "2026",
+      title: "Ready for My First Developer Role",
+      description:
+        "Graduating with a portfolio of deployed full-stack applications, continuously learning system design, performance optimization, and best development practices while actively seeking opportunities as a Software Developer.",
+    },
+  ];
 
   const developmentProcess = [
     {
@@ -811,11 +869,24 @@ function Portfolio({ theme, toggleTheme }) {
         </Section>
 
         {/* Skills */}
-        <Section id="skills" title="Skills" index={2}>
-          <div className="flex flex-wrap gap-2.5">
-            {skills.map((s, i) => SkillPill(s, i))}
-          </div>
-        </Section>
+    <Section id="skills" title="Skills" index={2}>
+      <motion.div 
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, margin: "-100px" }}
+        className="flex flex-wrap gap-3 max-w-5xl"
+      >
+        {SKILLS.map((skill) => (
+          <SkillPill 
+            key={skill.label.trim()} 
+            Icon={skill.Icon} 
+            label={skill.label.trim()} 
+          />
+        ))}
+      </motion.div>
+    </Section>
+  
 
         {/* Projects */}
         <Section
@@ -904,212 +975,209 @@ function Portfolio({ theme, toggleTheme }) {
           </div>
         </Section>
 
-{/* journey */}
+        {/* journey */}
 
-      <Section
-  id="journey"
-  title="My Journey"
-  subtitle="Every year brought new challenges, skills, and milestones."
-  index={4}
->
-  <div className="relative mx-auto max-w-4xl">
-
-    {/* Timeline */}
-    <div className="absolute left-8 top-0 h-full w-px bg-gradient-to-b from-neutral-300 via-neutral-200 to-transparent dark:from-neutral-700 dark:via-neutral-800" />
-
-    {journey.map((item, i) => (
-      <motion.div
-        key={item.year}
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true }}
-        variants={fadeUp}
-        className="relative flex gap-8 pb-16 last:pb-0"
-      >
-        {/* Dot */}
-        <div className="relative z-10 flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-xl">
-          <span className="text-sm font-bold">
-            {item.year.slice(2)}
-          </span>
-        </div>
-
-        {/* Card */}
-        <motion.div
-          whileHover={{ y: -6 }}
-          className="flex-1 rounded-3xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-7 transition-all duration-300 hover:shadow-2xl"
+        <Section
+          id="journey"
+          title="My Journey"
+          subtitle="Every year brought new challenges, skills, and milestones."
+          index={4}
         >
-          <span className="text-xs uppercase tracking-[0.25em] text-neutral-400">
-            {item.year}
-          </span>
+          <div className="relative mx-auto max-w-4xl">
+            {/* Timeline */}
+            <div className="absolute left-8 top-0 h-full w-px bg-gradient-to-b from-neutral-300 via-neutral-200 to-transparent dark:from-neutral-700 dark:via-neutral-800" />
 
-          <h3
-            className="mt-3 text-2xl font-semibold"
-            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-          >
-            {item.title}
-          </h3>
+            {journey.map((item, i) => (
+              <motion.div
+                key={item.year}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true }}
+                variants={fadeUp}
+                className="relative flex gap-8 pb-16 last:pb-0"
+              >
+                {/* Dot */}
+                <div className="relative z-10 flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-xl">
+                  <span className="text-sm font-bold">
+                    {item.year.slice(2)}
+                  </span>
+                </div>
 
-          <p className="mt-4 leading-8 text-neutral-500 dark:text-neutral-400">
-            {item.description}
-          </p>
-        </motion.div>
-      </motion.div>
-    ))}
-  </div>
-</Section>
+                {/* Card */}
+                <motion.div
+                  whileHover={{ y: -6 }}
+                  className="flex-1 rounded-3xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-7 transition-all duration-300 hover:shadow-2xl"
+                >
+                  <span className="text-xs uppercase tracking-[0.25em] text-neutral-400">
+                    {item.year}
+                  </span>
+
+                  <h3
+                    className="mt-3 text-2xl font-semibold"
+                    style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                  >
+                    {item.title}
+                  </h3>
+
+                  <p className="mt-4 leading-8 text-neutral-500 dark:text-neutral-400">
+                    {item.description}
+                  </p>
+                </motion.div>
+              </motion.div>
+            ))}
+          </div>
+        </Section>
 
         {/* process */}
 
- <Section
-  id="process"
-  title="Development Process"
-  subtitle="How I transform ideas into production-ready applications."
-  index={5}
->
-  <div className="relative mx-auto max-w-5xl">
+        <Section
+          id="process"
+          title="Development Process"
+          subtitle="How I transform ideas into production-ready applications."
+          index={5}
+        >
+          <div className="relative mx-auto max-w-5xl">
+            {/* Timeline */}
+            <div className="absolute left-8 top-10 bottom-10 w-px bg-gradient-to-b from-neutral-300 via-neutral-200 to-transparent dark:from-neutral-700 dark:via-neutral-800" />
 
-    {/* Timeline */}
-    <div className="absolute left-8 top-10 bottom-10 w-px bg-gradient-to-b from-neutral-300 via-neutral-200 to-transparent dark:from-neutral-700 dark:via-neutral-800" />
-
-    {developmentProcess.map((step, i) => (
-      <motion.div
-        key={step.title}
-        custom={i}
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true }}
-        variants={fadeUp}
-        className="relative flex gap-8 pb-12 last:pb-0"
-      >
-        {/* Icon Circle */}
-        <motion.div
-          whileHover={{
-            scale: 1.15,
-            rotate: 8,
-          }}
-          className="relative z-10 flex h-16 w-16 shrink-0 items-center justify-center rounded-full
+            {developmentProcess.map((step, i) => (
+              <motion.div
+                key={step.title}
+                custom={i}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true }}
+                variants={fadeUp}
+                className="relative flex gap-8 pb-12 last:pb-0"
+              >
+                {/* Icon Circle */}
+                <motion.div
+                  whileHover={{
+                    scale: 1.15,
+                    rotate: 8,
+                  }}
+                  className="relative z-10 flex h-16 w-16 shrink-0 items-center justify-center rounded-full
           bg-neutral-900 text-white
           dark:bg-white dark:text-neutral-900
           shadow-xl"
-        >
-          <step.icon size={24} />
-        </motion.div>
+                >
+                  <step.icon size={24} />
+                </motion.div>
 
-        {/* Card */}
-        <motion.div
-          whileHover={{
-            y: -8,
-            scale: 1.01,
-          }}
-          transition={{ type: "spring", stiffness: 250 }}
-          className="relative flex-1 overflow-hidden rounded-3xl
+                {/* Card */}
+                <motion.div
+                  whileHover={{
+                    y: -8,
+                    scale: 1.01,
+                  }}
+                  transition={{ type: "spring", stiffness: 250 }}
+                  className="relative flex-1 overflow-hidden rounded-3xl
           border border-neutral-200 dark:border-neutral-800
           bg-white/70 dark:bg-neutral-900/70
           backdrop-blur-xl
           p-8 shadow-sm transition-all"
-        >
-          {/* Huge Watermark */}
-          <span
-            className="absolute right-6 top-2 text-7xl font-black
+                >
+                  {/* Huge Watermark */}
+                  <span
+                    className="absolute right-6 top-2 text-7xl font-black
             text-neutral-100 dark:text-neutral-800 select-none"
-            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-          >
-            {String(i + 1).padStart(2, "0")}
-          </span>
+                    style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                  >
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
 
-          <h3
-            className="text-2xl font-semibold text-neutral-900 dark:text-white"
-            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-          >
-            {step.title}
-          </h3>
+                  <h3
+                    className="text-2xl font-semibold text-neutral-900 dark:text-white"
+                    style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                  >
+                    {step.title}
+                  </h3>
 
-          <p className="mt-4 max-w-2xl leading-8 text-neutral-500 dark:text-neutral-400">
-            {step.description}
-          </p>
+                  <p className="mt-4 max-w-2xl leading-8 text-neutral-500 dark:text-neutral-400">
+                    {step.description}
+                  </p>
 
-          {/* Progress Line */}
-          <div className="mt-6 h-1 w-24 rounded-full bg-neutral-200 dark:bg-neutral-800 overflow-hidden">
-            <motion.div
-              initial={{ width: 0 }}
-              whileInView={{ width: "100%" }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2, duration: 0.8 }}
-              className="h-full bg-neutral-900 dark:bg-white"
-            />
+                  {/* Progress Line */}
+                  <div className="mt-6 h-1 w-24 rounded-full bg-neutral-200 dark:bg-neutral-800 overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      whileInView={{ width: "100%" }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 0.2, duration: 0.8 }}
+                      className="h-full bg-neutral-900 dark:bg-white"
+                    />
+                  </div>
+                </motion.div>
+              </motion.div>
+            ))}
           </div>
-        </motion.div>
-      </motion.div>
-    ))}
-  </div>
-</Section>
+        </Section>
 
         {/* toolbox */}
-<Section
+     <Section
   id="toolbox"
   title="Toolbox"
-  subtitle="Technologies I use to design, build, test and deploy modern web applications."
+  subtitle="Technologies I use to design, build, test, and deploy modern web applications."
   index={6}
 >
-  <div className="flex flex-wrap justify-center gap-5">
+  <div className="flex flex-wrap justify-center gap-4 max-w-5xl mx-auto px-4">
     {toolbox.map((tool, i) => (
       <motion.div
         key={tool.title}
-        initial={{ opacity: 0, y: 40 }}
+        // Entry Animation
+        initial={{ opacity: 0, y: 25 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{
-          delay: i * 0.08,
-          duration: 0.5,
+          delay: i * 0.05,
+          duration: 0.4,
+          ease: "easeOut",
         }}
+        // Continuous Floating Effect
         animate={{
-          y: [0, -6, 0],
+          y: [0, -4, 0],
         }}
+        // Hover Scale & Shake
         whileHover={{
-          scale: 1.08,
-          rotate: i % 2 === 0 ? -4 : 4,
-          y: -10,
+          scale: 1.05,
+          rotate: i % 2 === 0 ? -2 : 2,
         }}
-        transition={{
+        // Separate configuration for the infinite float loop to prevent hovering glitches
+        custom-transition-override={{
           y: {
-            duration: 3 + (i % 3),
+            duration: 4 + (i % 3),
             repeat: Infinity,
             ease: "easeInOut",
           },
         }}
-        className={`group relative flex w-[170px] flex-col items-center rounded-3xl border
-        border-neutral-200 dark:border-neutral-800
-        bg-white dark:bg-neutral-900
-        px-6 py-7 shadow-sm transition-all hover:shadow-xl
-        ${
-          i % 3 === 1
-            ? "mt-8"
-            : i % 3 === 2
-            ? "mt-16"
-            : ""
-        }`}
+        className="group relative flex w-[150px] flex-col items-center rounded-2xl border
+          border-neutral-200 dark:border-neutral-800/80
+          bg-white dark:bg-neutral-900/50 backdrop-blur-sm
+          px-4 py-5 text-center shadow-sm transition-all duration-300
+          hover:border-blue-500/40 dark:hover:border-violet-500/40 
+          hover:shadow-md hover:shadow-blue-500/5 dark:hover:shadow-violet-500/5"
       >
-        {/* Glow */}
-        <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-blue-500/0 via-violet-500/0 to-cyan-500/0 opacity-0 blur-xl transition-all duration-500 group-hover:from-blue-500/10 group-hover:via-violet-500/10 group-hover:to-cyan-500/10 group-hover:opacity-100" />
+        {/* Subtle Inner Highlight on Hover */}
+        <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-blue-500/0 to-violet-500/0 opacity-0 transition-opacity duration-300 group-hover:from-blue-500/[0.02] group-hover:to-violet-500/[0.02] group-hover:opacity-100" />
 
-        {/* Icon */}
-        <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-neutral-100 dark:bg-neutral-800 transition-transform duration-300 group-hover:rotate-6 group-hover:scale-110">
+        {/* Compact Icon Container */}
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-neutral-50 dark:bg-neutral-800/50 transition-colors duration-300 group-hover:bg-neutral-100 dark:group-hover:bg-neutral-800">
           <tool.icon
-            size={30}
-            className="text-neutral-900 dark:text-white"
+            size={22}
+            className="text-neutral-700 dark:text-neutral-300 transition-colors duration-300 group-hover:text-blue-500 dark:group-hover:text-violet-400"
           />
         </div>
 
-        {/* Name */}
+        {/* Title */}
         <h3
-          className="relative mt-5 text-lg font-semibold text-neutral-900 dark:text-white"
+          className="mt-4 text-sm font-semibold tracking-tight text-neutral-900 dark:text-neutral-100"
           style={{ fontFamily: "'Space Grotesk', sans-serif" }}
         >
           {tool.title}
         </h3>
 
-        {/* Description */}
-        <p className="relative mt-2 text-center text-sm leading-6 text-neutral-500 dark:text-neutral-400">
+        {/* Shorter, Cleaner Description */}
+        <p className="mt-1 text-xs leading-normal text-neutral-400 dark:text-neutral-500">
           {tool.description}
         </p>
       </motion.div>
@@ -1212,8 +1280,7 @@ function Portfolio({ theme, toggleTheme }) {
           </div>
         </Section>
 
-
-{/* conatct */}
+        {/* conatct */}
         <motion.section
           id="contact"
           className="mt-14"
@@ -1285,15 +1352,12 @@ function Portfolio({ theme, toggleTheme }) {
             </div>
           </div>
         </motion.section>
-
       </div>
-      <Footer/>
+      <Footer />
       <FloatingDock theme={theme} toggleTheme={toggleTheme} />
-    </div>  
+    </div>
   );
 }
-
-
 
 const GREETINGS = [
   { text: "नमस्ते", lang: "Hindi" },
@@ -1306,16 +1370,26 @@ const GREETINGS = [
 const PER_WORD_MS = 1000;
 
 export function IntroGreeting({ onComplete }) {
-  const [index, setIndex] = React.useState(0);
-  const [exiting, setExiting] = React.useState(false);
+  const [index, setIndex] = useState(0);
+  const [exiting, setExiting] = useState(false);
+  const containerRef = useRef(null);
 
-  React.useEffect(() => {
+  // Smooth mouse-tracking for ambient premium spotlight
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const springX = useSpring(mouseX, { stiffness: 60, damping: 25 });
+  const springY = useSpring(mouseY, { stiffness: 60, damping: 25 });
+
+  useEffect(() => {
+    // Set initial mouse positioning centered
+    if (typeof window !== "undefined") {
+      mouseX.set(window.innerWidth / 2);
+      mouseY.set(window.innerHeight / 2);
+    }
+
     if (index >= GREETINGS.length - 1) {
-      const exitTimer = setTimeout(() => setExiting(true), PER_WORD_MS + 200);
-      const doneTimer = setTimeout(
-        () => onComplete && onComplete(),
-        PER_WORD_MS + 1100,
-      );
+      const exitTimer = setTimeout(() => setExiting(true), PER_WORD_MS + 100);
+      const doneTimer = setTimeout(() => onComplete?.(), PER_WORD_MS + 1200);
       return () => {
         clearTimeout(exitTimer);
         clearTimeout(doneTimer);
@@ -1323,93 +1397,131 @@ export function IntroGreeting({ onComplete }) {
     }
     const t = setTimeout(() => setIndex((i) => i + 1), PER_WORD_MS);
     return () => clearTimeout(t);
-  }, [index, onComplete]);
+  }, [index, onComplete, mouseX, mouseY]);
+
+  const handleMouseMove = (e) => {
+    if (!containerRef.current) return;
+    const { clientX, clientY } = e;
+    mouseX.set(clientX);
+    mouseY.set(clientY);
+  };
 
   const skip = () => {
     setExiting(true);
-    setTimeout(() => onComplete && onComplete(), 900);
+    setTimeout(() => onComplete?.(), 1000);
   };
 
   const current = GREETINGS[index];
-  const letters = current.text.split("");
+  const words = current.text.split(" ");
 
+  // Custom high-end text reveal transitions
   const containerVariants = {
-    initial: {},
-    animate: { transition: { staggerChildren: 0.045 } },
-    exit: { transition: { staggerChildren: 0.02, staggerDirection: -1 } },
+    animate: { transition: { staggerChildren: 0.08 } },
+    exit: { transition: { staggerChildren: 0.04, staggerDirection: -1 } },
   };
 
-  const letterVariants = {
-    initial: { opacity: 0, y: 40, filter: "blur(6px)" },
+  const wordVariants = {
+    initial: { y: "105%" },
     animate: {
-      opacity: 1,
-      y: 0,
-      filter: "blur(0px)",
-      transition: { type: "spring", stiffness: 170, damping: 20 },
+      y: "0%",
+      transition: { duration: 0.85, ease: [0.16, 1, 0.3, 1] },
     },
     exit: {
-      opacity: 0,
-      y: -24,
-      filter: "blur(4px)",
-      transition: { duration: 0.3, ease: [0.33, 1, 0.68, 1] },
+      y: "-105%",
+      transition: { duration: 0.6, ease: [0.7, 0, 0.84, 0] },
     },
   };
 
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       {!exiting && (
         <motion.div
+          ref={containerRef}
           key="intro-root"
-          initial={{ y: "0%" }}
-          exit={{ y: "-100%" }}
-          transition={{ duration: 1, ease: [0.85, 0, 0.15, 1] }}
-          className="fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-[#0A0A0A] origin-top select-none overflow-hidden"
+          initial={{ opacity: 1 }}
+          exit={{
+            clipPath: "inset(0% 0% 100% 0%)",
+            transition: { duration: 1.1, ease: [0.85, 0, 0.15, 1] },
+          }}
+          onMouseMove={handleMouseMove}
+          className="fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-[#070708] select-none overflow-hidden"
         >
-          {/* Film grain */}
-          <svg className="absolute inset-0 w-full h-full opacity-[0.05] pointer-events-none mix-blend-overlay">
-            <filter id="grain">
-              <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch" />
-            </filter>
-            <rect width="100%" height="100%" filter="url(#grain)" />
-          </svg>
+          {/* Animated Film Grain Overlay */}
+          <div className="absolute inset-0 opacity-[0.04] pointer-events-none mix-blend-overlay">
+            <svg className="w-full h-full">
+              <filter id="grainy-noise">
+                <feTurbulence
+                  type="fractalNoise"
+                  baseFrequency="0.80"
+                  numOctaves="3"
+                  stitchTiles="stitch"
+                />
+                <feColorMatrix
+                  type="matrix"
+                  values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 14 -4"
+                />
+              </filter>
+              <rect width="100%" height="100%" filter="url(#grainy-noise)" />
+            </svg>
+          </div>
 
-          {/* Breathing spotlight */}
+          {/* Immersive Interactive Ambient Spotlight */}
           <motion.div
-            animate={{ opacity: [0.5, 0.85, 0.5], scale: [1, 1.08, 1] }}
-            transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute w-[36rem] h-[36rem] rounded-full pointer-events-none"
+            className="absolute w-[50rem] h-[50rem] rounded-full pointer-events-none mix-blend-screen opacity-60 filter blur-[80px]"
             style={{
+              x: springX,
+              y: springY,
+              translateX: "-50%",
+              translateY: "-50%",
               background:
-                "radial-gradient(circle, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.02) 45%, transparent 70%)",
+                "radial-gradient(circle, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.01) 50%, transparent 80%)",
             }}
           />
 
-          {/* Corner registration marks */}
+          {/* Structural Editorial Calibration Marks (Crosshairs) */}
           {[
-            "top-6 left-6 border-t border-l",
-            "top-6 right-6 border-t border-r",
-            "bottom-6 left-6 border-b border-l",
-            "bottom-6 right-6 border-b border-r",
+            "top-8 left-8",
+            "top-8 right-8",
+            "bottom-8 left-8",
+            "bottom-8 right-8",
           ].map((pos) => (
-            <div key={pos} className={`absolute ${pos} w-4 h-4 border-[#FAFAF8]/20`} />
+            <div
+              key={pos}
+              className={`absolute ${pos} flex items-center justify-center pointer-events-none w-4 h-4`}
+            >
+              <span className="absolute w-full h-[1px] bg-white/[0.12]" />
+              <span className="absolute h-full w-[1px] bg-white/[0.12]" />
+            </div>
           ))}
 
-          {/* Progress tracker */}
-          <div className="absolute top-10 left-1/2 -translate-x-1/2 flex items-center gap-2.5">
+          {/* Minimalist Linear Progress Bar Tracker */}
+          <div className="absolute top-12 flex items-center gap-2">
             {GREETINGS.map((g, i) => (
-              <div key={g.lang} className="relative h-[1.5px] w-5 bg-[#FAFAF8]/10 overflow-hidden">
+              <div
+                key={g.lang}
+                className="relative h-[2px] w-8 bg-white/[0.06] overflow-hidden rounded-full"
+              >
                 <motion.div
                   initial={{ width: "0%" }}
-                  animate={{ width: i < index ? "100%" : i === index ? "100%" : "0%" }}
-                  transition={{ duration: i === index ? PER_WORD_MS / 1000 : 0.2, ease: "linear" }}
-                  className="absolute left-0 top-0 h-full bg-[#FAFAF8]/80"
+                  animate={{
+                    width: i < index ? "100%" : i === index ? "100%" : "0%",
+                    opacity: i === index ? 1 : 0.4,
+                  }}
+                  transition={{
+                    width:
+                      i === index
+                        ? { duration: PER_WORD_MS / 1000, ease: "linear" }
+                        : { duration: 0.4 },
+                    opacity: { duration: 0.3 },
+                  }}
+                  className="absolute left-0 top-0 h-full bg-gradient-to-r from-white/60 to-white"
                 />
               </div>
             ))}
           </div>
 
-          {/* Typography */}
-          <div className="relative h-44 flex flex-col items-center justify-center px-8 z-10">
+          {/* Core Typography Canvas */}
+          <div className="relative h-60 flex flex-col items-center justify-center px-6 z-10">
             <AnimatePresence mode="wait">
               <motion.div
                 key={current.text}
@@ -1417,53 +1529,63 @@ export function IntroGreeting({ onComplete }) {
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                className="flex flex-wrap justify-center text-center font-medium tracking-tight"
+                className="flex flex-wrap justify-center text-center font-light tracking-tight overflow-hidden pb-3"
               >
-                {letters.map((char, i) => (
-                  <motion.span
-                    key={`${char}-${i}`}
-                    variants={letterVariants}
-                    style={{
-                      display: "inline-block",
-                      fontSize: "clamp(3rem, 10vw, 6.5rem)",
-                      fontFamily: "'Space Grotesk', 'Noto Sans', sans-serif",
-                    }}
-                    className="text-[#FAFAF8] leading-none pb-2"
+                {words.map((word, wordIdx) => (
+                  <div
+                    key={`${word}-${wordIdx}`}
+                    className="overflow-hidden inline-block mx-3"
                   >
-                    {char === " " ? "\u00A0" : char}
-                  </motion.span>
+                    <motion.span
+                      variants={wordVariants}
+                      style={{
+                        display: "inline-block",
+                        fontSize: "clamp(3.5rem, 9vw, 7rem)",
+                        fontFamily:
+                          "'Playfair Display', 'Cinzel', 'Noto Sans', serif",
+                      }}
+                      className="text-[#F3F3F3] font-medium tracking-tight leading-none"
+                    >
+                      {word}
+                    </motion.span>
+                  </div>
                 ))}
               </motion.div>
             </AnimatePresence>
 
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={`lang-${current.lang}`}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.4 }}
-                className="mt-6 flex items-center gap-3"
-              >
-                <span className="w-6 h-px bg-[#FAFAF8]/25" />
-                <p className="text-[10px] uppercase font-medium text-[#8A8A8A] tracking-[0.35em]">
-                  {current.lang}
-                </p>
-                <span className="w-6 h-px bg-[#FAFAF8]/25" />
-              </motion.div>
-            </AnimatePresence>
+            {/* Language Sub-Label metadata Indicator */}
+            <div className="overflow-hidden mt-4 h-6 flex items-center">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={`lang-${current.lang}`}
+                  initial={{ y: "100%", opacity: 0 }}
+                  animate={{ y: "0%", opacity: 1 }}
+                  exit={{ y: "-100%", opacity: 0 }}
+                  transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                  className="flex items-center gap-4"
+                >
+                  <span className="w-8 h-[1px] bg-white/15" />
+                  <p className="text-[10px] uppercase font-mono text-white/40 tracking-[0.4em]">
+                    {current.lang}
+                  </p>
+                  <span className="w-8 h-[1px] bg-white/15" />
+                </motion.div>
+              </AnimatePresence>
+            </div>
           </div>
 
-          {/* Skip */}
+          {/* Premium Control Center Action */}
           <motion.button
             onClick={skip}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            whileHover={{ opacity: 1, borderColor: "rgba(250,250,248,0.4)" }}
-            className="absolute bottom-12 px-5 py-2 text-[11px] font-medium text-[#8A8A8A] hover:text-[#FAFAF8] border border-[#FAFAF8]/15 rounded-full tracking-widest uppercase transition-colors duration-300"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6, duration: 0.5 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="group absolute bottom-14 px-6 py-2.5 text-[10px] font-medium text-white/40 hover:text-white tracking-[0.25em] uppercase transition-colors duration-300 ease-out"
           >
-            Skip Intro
+            <span>Skip Intro</span>
+            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[1px] bg-white/40 group-hover:w-1/2 transition-all duration-300 ease-out" />
           </motion.button>
         </motion.div>
       )}
@@ -1472,8 +1594,8 @@ export function IntroGreeting({ onComplete }) {
 }
 
 export default function App() {
-  const [showIntro, setShowIntro] = React.useState(true);
-  const [theme, setTheme] = React.useState("light");
+  const [showIntro, setShowIntro] = useState(true);
+  const [theme, setTheme] = useState("light");
 
   React.useEffect(() => {
     const link = document.createElement("link");
