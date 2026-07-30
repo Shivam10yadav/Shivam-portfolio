@@ -892,7 +892,7 @@ function Portfolio({ theme, toggleTheme }) {
       logo: "B",
       color: "#000000",
       title: "Bachelor of Computer Applications (BCA)",
-      subtitle: "Pt Chiranji Lal Sharma / Kurekshetra University",
+      subtitle: "Pt Chiranji Lal Sharma / Kurukshetra University",
       period: "2023 - 2026",
     },
     {
