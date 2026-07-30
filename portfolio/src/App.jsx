@@ -242,8 +242,8 @@ const CINEMATIC_HERO_STYLES = `
 function CinematicHero({
   theme = "light",
   brandName = "SHIVAM YADAV",
-  tagline1 = "Building products,",
-  tagline2 = "one commit at a time.",
+  tagline1 = "Shivam Yadav,",
+  tagline2 = "Full Stack Developer.",
   cardHeading = "Full-stack development, redefined.",
   cardDescription = (
    <>
@@ -318,7 +318,7 @@ function CinematicHero({
         scrollTrigger: {
           trigger: containerRef.current,
           start: "top top",
-          end: "+=7000",
+          end: "+=3000",
           pin: true,
           scrub: 1,
           anticipatePin: 1,
