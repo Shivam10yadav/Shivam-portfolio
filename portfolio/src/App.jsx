@@ -246,13 +246,13 @@ function CinematicHero({
   tagline2 = "one commit at a time.",
   cardHeading = "Full-stack development, redefined.",
   cardDescription = (
-    <>
-      <span className="text-white font-semibold">Shivam</span> designs and ships
-      production-grade MERN SaaS apps end-to-end — from schema design and auth
-      to deployment on Vercel and Render.
-    </>
+   <>
+  <span className="text-white font-semibold">Shivam</span> builds modern,
+  production-ready applications, turning ideas into scalable products
+  with clean architecture, secure authentication, and seamless deployment.
+</>
   ),
-  metricValue = 10,
+  metricValue = 3,
   metricLabel = "Live Projects Shipped",
   ctaHeading = "Let's build something great.",
   ctaDescription = "Actively looking for my first developer role — reach out for opportunities, collaborations, or just to say hi.",
@@ -334,8 +334,6 @@ function CinematicHero({
           { y: 0, z: 0, rotationX: 0, rotationY: 0, autoAlpha: 1, scale: 1, ease: "expo.out", duration: 2.5 }, "-=0.8"
         )
         .fromTo(".phone-widget", { y: 40, autoAlpha: 0, scale: 0.95 }, { y: 0, autoAlpha: 1, scale: 1, stagger: 0.15, ease: "back.out(1.2)", duration: 1.5 }, "-=1.5")
-        .to(".progress-ring", { strokeDashoffset: 60, duration: 2, ease: "power3.inOut" }, "-=1.2")
-        .to(".counter-val", { innerHTML: metricValue, snap: { innerHTML: 1 }, duration: 2, ease: "expo.out" }, "-=2.0")
         .fromTo(".floating-badge", { y: 100, autoAlpha: 0, scale: 0.7, rotationZ: -10 }, { y: 0, autoAlpha: 1, scale: 1, rotationZ: 0, ease: "back.out(1.5)", duration: 1.5, stagger: 0.2 }, "-=2.0")
         .fromTo(".card-left-text", { x: -50, autoAlpha: 0 }, { x: 0, autoAlpha: 1, ease: "power4.out", duration: 1.5 }, "-=1.5")
         .fromTo(".card-right-text", { x: 50, autoAlpha: 0, scale: 0.8 }, { x: 0, autoAlpha: 1, scale: 1, ease: "expo.out", duration: 1.5 }, "<")
@@ -370,7 +368,7 @@ function CinematicHero({
       <div className="film-grain" aria-hidden="true" />
       <div className="bg-grid-theme absolute inset-0 z-0 pointer-events-none opacity-50" aria-hidden="true" />
 
-      {/* BACKGROUND LAYER: Hero Texts */}
+      {/* BACKGROUND LAYER: Hero Texts */}  
       <div className="hero-text-wrapper absolute z-10 flex flex-col items-center justify-center text-center w-screen px-4 will-change-transform">
         <h1 className="text-track gsap-reveal text-3d-matte text-5xl md:text-7xl lg:text-[6rem] font-bold tracking-tight mb-2">
           {tagline1}
@@ -445,19 +443,18 @@ function CinematicHero({
                       <div className="phone-widget flex justify-between items-center mb-8">
                         <div className="flex flex-col">
                           <span className="text-[10px] text-neutral-400 uppercase tracking-widest font-bold mb-1">Dashboard</span>
-                          <span className="text-xl font-bold tracking-tight text-white drop-shadow-md">Shivam.dev</span>
+                          <span className="text-xl font-bold tracking-tight text-white drop-shadow-md">shivamx10</span>
                         </div>
                         <div className="w-9 h-9 rounded-full bg-white/5 text-neutral-200 flex items-center justify-center font-bold text-sm border border-white/10 shadow-lg shadow-black/50">SY</div>
                       </div>
 
                       <div className="phone-widget relative w-44 h-44 mx-auto flex items-center justify-center mb-8 drop-shadow-[0_15px_25px_rgba(0,0,0,0.8)]">
-                        <svg className="absolute inset-0 w-full h-full" aria-hidden="true">
-                          <circle cx="88" cy="88" r="64" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="12" />
-                          <circle className="progress-ring" cx="88" cy="88" r="64" fill="none" stroke="#3B82F6" strokeWidth="12" />
-                        </svg>
-                        <div className="text-center z-10 flex flex-col items-center">
-                          <span className="counter-val text-4xl font-extrabold tracking-tighter text-white">0</span>
-                          <span className="text-[8px] text-blue-200/50 uppercase tracking-[0.1em] font-bold mt-0.5 text-center px-2">{metricLabel}</span>
+                        <div className="w-full h-full rounded-full overflow-hidden border-4 border-blue-500/40 shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]">
+                          <img
+                            src="/profile.jpeg"
+                            alt="Shivam Yadav"
+                            className="w-full h-full object-cover object-top"
+                          />
                         </div>
                       </div>
 
@@ -488,22 +485,14 @@ function CinematicHero({
                 </div>
 
                 {/* Floating badges */}
-                <div className="floating-badge absolute flex top-6 lg:top-12 left-[-15px] lg:left-[-80px] floating-ui-badge rounded-xl lg:rounded-2xl p-3 lg:p-4 items-center gap-3 lg:gap-4 z-30">
-                  <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-gradient-to-b from-blue-500/20 to-blue-900/10 flex items-center justify-center border border-blue-400/30 shadow-inner">
-                    <span className="text-base lg:text-xl drop-shadow-lg" aria-hidden="true">🚀</span>
-                  </div>
-                  <div>
-                    <p className="text-white text-xs lg:text-sm font-bold tracking-tight">3+ Projects</p>
-                    <p className="text-blue-200/50 text-[10px] lg:text-xs font-medium">Shipped to production</p>
-                  </div>
-                </div>
+               
 
                 <div className="floating-badge absolute flex bottom-12 lg:bottom-20 right-[-15px] lg:right-[-80px] floating-ui-badge rounded-xl lg:rounded-2xl p-3 lg:p-4 items-center gap-3 lg:gap-4 z-30">
                   <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-gradient-to-b from-indigo-500/20 to-indigo-900/10 flex items-center justify-center border border-indigo-400/30 shadow-inner">
                     <span className="text-base lg:text-lg drop-shadow-lg" aria-hidden="true">⚡</span>
                   </div>
                   <div>
-                    <p className="text-white text-xs lg:text-sm font-bold tracking-tight">MERN Stack</p>
+                    <p className="text-white text-xs lg:text-sm font-bold tracking-tight">Full Stack Developer</p>
                     <p className="text-blue-200/50 text-[10px] lg:text-xs font-medium">Full-stack ready</p>
                   </div>
                 </div>
