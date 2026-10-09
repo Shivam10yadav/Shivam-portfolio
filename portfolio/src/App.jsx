@@ -64,6 +64,7 @@ import {
 import Footer from "./components/Footer";
 import WavingPortfolioLanding from "./components/WavingPortfolioLanding";
 import GithubActivity from "./components/GithubActivity";
+import Dock from "./components/Dock";
 
 
 
@@ -323,62 +324,7 @@ function ProjectCard({
   );
 }
 
-function FloatingDock({ theme, toggleTheme }) {
-  const links = [
-    { Icon: FaHome, label: "Home", href: "#" },
-    { Icon: FaBook, label: "Resume", href: "#resume" },
-    {
-      Icon: FaGithub,
-      label: "GitHub",
-      href: "https://github.com/Shivam10yadav/",
-    },
-    {
-      Icon: FaLinkedin,
-      label: "LinkedIn",
-      href: "https://www.linkedin.com/in/shivam10yadav/",
-    },
-    { Icon: FaTwitter, label: "X", href: "https://x.com/Y80Shivam" },
-    {
-      Icon: FaInstagram,
-      label: "Instagram",
-      href: "https://www.instagram.com/shivam05_10/",
-    },
-  ];
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.3 }}
-      className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50"
-    >
-      <div className="flex items-center gap-1.5 rounded-full border border-neutral-200 dark:border-neutral-800 bg-white/90 dark:bg-neutral-900/90 backdrop-blur px-3 py-2 shadow-lg">
-        {links.map(({ Icon, label, href }) => (
-          <motion.a
-            key={label}
-            href={href}
-            aria-label={label}
-            whileHover={{ y: -3, scale: 1.08 }}
-            className="h-10 w-10 rounded-full flex items-center justify-center text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-white transition-colors"
-          >
-            <Icon size={17} />
-          </motion.a>
-        ))}
-        <div className="w-px h-6 bg-neutral-200 dark:bg-neutral-700 mx-1" />
-
-        <motion.button
-          onClick={toggleTheme}
-          aria-label="Toggle theme"
-          whileHover={{ y: -3, scale: 1.08 }}
-          whileTap={{ scale: 0.9 }}
-          className="h-10 w-10 rounded-full flex items-center justify-center text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-white transition-colors"
-        >
-          {theme === "dark" ? <FaSun size={16} /> : <FaMoon size={16} />}
-        </motion.button>
-      </div>
-    </motion.div>
-  );
-}
 
 function Portfolio({ theme, toggleTheme }) {
   const name = "Shivam Yadav";
@@ -1217,7 +1163,7 @@ function Portfolio({ theme, toggleTheme }) {
         </motion.section>
       </div>
       <Footer />
-      <FloatingDock theme={theme} toggleTheme={toggleTheme} />
+         <Dock theme={theme} toggleTheme={toggleTheme} />
     </div>
   );
 }
