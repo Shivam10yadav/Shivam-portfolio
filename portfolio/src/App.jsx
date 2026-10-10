@@ -65,6 +65,7 @@ import Footer from "./components/Footer";
 import WavingPortfolioLanding from "./components/WavingPortfolioLanding";
 import GithubActivity from "./components/GithubActivity";
 import Dock from "./components/Dock";
+import TechStack from "./components/TechStack";
 
 
 
@@ -720,23 +721,15 @@ function Portfolio({ theme, toggleTheme }) {
         </Section>
 
         {/* Skills */}
-        <Section id="skills" title="Skills" index={2}>
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: "-100px" }}
-            className="flex flex-wrap gap-3 max-w-5xl"
-          >
-            {SKILLS.map((skill) => (
-              <SkillPill
-                key={skill.label.trim()}
-                Icon={skill.Icon}
-                label={skill.label.trim()}
-              />
-            ))}
-          </motion.div>
-        </Section>
+    {/* Tech Stack */}
+<Section
+  id="skills"
+  title="Tech Stack"
+  subtitle="Hover over the icons to explore the tools I work with."
+  index={2}
+>
+  <TechStack />
+</Section>
 
         {/* Projects */}
         <Section
