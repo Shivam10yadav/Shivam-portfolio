@@ -1,6 +1,13 @@
 // Waving Portfolio Landing (JSX version) — a red-on-paper poster landing page.
 // Everything is drawn in this file — no fonts, images or packages load.
+//
+// MOBILE: on portrait screens (width/height < 0.9) the poster re-flows into a
+// tall 4-row grid (P/F + giant O on top, RT/LIO below) with the character
+// standing at the bottom-right, so the letters render ~2.5x larger than
+// squeezing the wide desktop layout. The desktop layout is untouched.
 import * as React from "react";
+
+const useIsoLayoutEffect = typeof window !== "undefined" ? React.useLayoutEffect : React.useEffect;
 
 // #region glyphs
 const WIDE = { A: 1.04, M: 1.3, N: 1.04, Q: 1.02, V: 1.04, W: 1.44, X: 1.02 };
@@ -136,6 +143,12 @@ const MARGIN = 100;
 const CHAR_GAP = 520;
 const TOP = 100;
 
+// Portrait / mobile layout constants
+const M_MARGIN = 30;
+const M_CHAR_SCALE = 0.7;
+const M_WIDTH = 600;
+const M_HEADER = 70; // extra room for the bigger name on mobile
+
 const cleanRow = (s) => s.toUpperCase().replace(/[^A-Z ]/g, "").trim();
 
 function rowWidth(str) {
@@ -146,13 +159,55 @@ function rowWidth(str) {
   return t;
 }
 
+// Portrait / mobile: each name is its own full row (the giant letter is repeated
+// inside every word, e.g. SHIV+A+M / YAD+A+V), so nothing has to be read "through"
+// a shared letter. Letters are scaled to fit the width, then the character
+// stands underneath.
+function layoutCompact(l, g, r) {
+  const margin = M_MARGIN;
+  const width = M_WIDTH;
+  const avail = width - margin * 2;
+  const words = [0, 1].map((i) => cleanRow(l[i] + g + r[i]));
+  const widest = Math.max(1, ...words.map(rowWidth));
+  const sc = Math.min(1, avail / widest);
+  const lw = LW * sc;
+  const ls = LS * sc;
+  const lgap = LGAP * sc;
+  const lh = LH * sc * 1.2;
+  const rgap = ROWGAP * sc;
+  const top = TOP + M_HEADER;
+  const cells = [];
+  words.forEach((word, row) => {
+    let x = margin;
+    for (const ch of word) {
+      const w = glyphWidth(ch, lw, ls);
+      if (ch !== " ") cells.push({ ch, x, y: top + row * (lh + rgap), w, h: lh, s: ls, row, giant: false });
+      x += w + lgap;
+    }
+  });
+  const wordsBottom = top + lh * 2 + rgap;
+  const k = M_CHAR_SCALE;
+  const bottom = wordsBottom + 110 + 560 * k;
+  return {
+    cells,
+    width,
+    height: bottom + 130,
+    margin,
+    charScale: k,
+    charLeft: width - margin - 435 * k,
+    charTop: bottom + 25 - 600 * k,
+    bottom,
+  };
+}
+
 function layoutPoster(left, giant, right, compact = false) {
-  const margin = compact ? 30 : MARGIN;
-  const charGap = compact ? 390 : CHAR_GAP;
-  const charScale = compact ? 0.84 : 1;
+  const margin = compact ? M_MARGIN : MARGIN;
+  const top = compact ? TOP + M_HEADER : TOP;
+  const charScale = compact ? M_CHAR_SCALE : 1;
   const l = [cleanRow(left[0] ?? ""), cleanRow(left[1] ?? "")];
   const r = [cleanRow(right[0] ?? ""), cleanRow(right[1] ?? "")];
   const g = cleanRow(giant).replace(/ /g, "").slice(0, 1) || "O";
+  if (compact) return layoutCompact(l, g, r);
   const lw = Math.max(rowWidth(l[0]), rowWidth(l[1]));
   const rw = Math.max(rowWidth(r[0]), rowWidth(r[1]));
   const cells = [];
@@ -161,7 +216,7 @@ function layoutPoster(left, giant, right, compact = false) {
     for (const ch of str) {
       const w = glyphWidth(ch, LW, LS);
       if (ch !== " ")
-        cells.push({ ch, x, y: TOP + row * (LH + ROWGAP), w, h: LH, s: LS, row, giant: false });
+        cells.push({ ch, x, y: top + row * (LH + ROWGAP), w, h: LH, s: LS, row, giant: false });
       x += w + LGAP;
     }
   };
@@ -169,19 +224,22 @@ function layoutPoster(left, giant, right, compact = false) {
   const gx = margin + lw + (lw ? LGAP : 0);
   const gw = g === "I" ? GS : GW * (WIDE[g] ?? 1);
   const gapStart = gx + gw;
-  const rx = gapStart + charGap;
+  const bottom = top + LH * 2 + ROWGAP;
+
+  const rx = gapStart + CHAR_GAP;
   r.forEach((row, i) => place(row, rx, i));
-  cells.push({ ch: g, x: gx, y: TOP, w: gw, h: LH * 2 + ROWGAP, s: GS, row: 0, giant: true });
+  cells.push({ ch: g, x: gx, y: top, w: gw, h: LH * 2 + ROWGAP, s: GS, row: 0, giant: true });
   const width = rx + rw + margin;
+  const charX = gapStart + CHAR_GAP * 0.36;
   return {
     cells,
     width,
     height: 700,
     margin,
     charScale,
-    gapStart,
-    charX: gapStart + charGap * 0.36,
-    bottom: TOP + LH * 2 + ROWGAP,
+    charLeft: charX - 205 * charScale,
+    charTop: bottom + 25 - 600 * charScale,
+    bottom,
   };
 }
 // #endregion layout
@@ -191,8 +249,7 @@ const hash = (n) => {
   const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
   return x - Math.floor(x);
 };
-const LABEL = 30;
-const labelWidth = (s) => s.length * LABEL * 0.72;
+const labelWidth = (s, size) => s.length * size * 0.72;
 
 // Intro timeline, ms.
 const SCRAMBLE_AT = 2650;
@@ -292,6 +349,14 @@ export default function WavingPortfolioLanding({
       timers.current.forEach(clearTimeout);
       cancelAnimationFrame(frame.current);
     };
+  }, []);
+
+  // Measure before first paint so mobile never flashes the desktop layout.
+  useIsoLayoutEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+    const b = el.getBoundingClientRect();
+    if (b.width && b.height) setCompact(b.width / b.height < 0.9);
   }, []);
 
   React.useEffect(() => {
@@ -457,19 +522,28 @@ export default function WavingPortfolioLanding({
   };
 
   const stage = !intro ? "off" : ready ? "done" : "on";
-  const nameEnd = L.margin + labelWidth(nameU) + 26;
-  const yearStart = L.width - L.margin - labelWidth(yearU) - 26;
-  const roleLEnd = L.margin + labelWidth(roleL) + 26;
-  const roleRStart = L.width - L.margin - labelWidth(roleR) - 26;
-  const bubbleW = greeting.length * 19 + 48;
+  const labelSize = compact ? 40 : 30;
+  const nameSize = compact ? Math.min(58, (L.width - 2 * L.margin) / (Math.max(1, nameU.length) * 0.72)) : 30;
+  const nameEnd = L.margin + labelWidth(nameU, labelSize) + 26;
+  const yearStart = L.width - L.margin - labelWidth(yearU, labelSize) - 26;
+  const roleLEnd = L.margin + labelWidth(roleL, labelSize) + 26;
+  const roleRStart = L.width - L.margin - labelWidth(roleR, labelSize) - 26;
+  const bubbleW = greeting.length * (compact ? 24 : 19) + 48;
   const k = L.charScale;
-  const charLeft = L.charX - 205 * k;
+  const charLeft = L.charLeft;
+  const charTop = L.charTop;
+  // Speech bubble: beside the head on desktop; kept inside the poster on mobile.
+  const bubbleX = compact
+    ? Math.max(L.margin, Math.min(charLeft + 372 * k, L.width - 16 - bubbleW))
+    : charLeft + 372 * k;
+  const bubbleY = compact ? charTop - 55 : 20;
 
   return (
     <div
       ref={rootRef}
       className={"wpl-root " + className}
       data-intro={stage}
+      data-compact={compact ? "1" : "0"}
       style={{ height, "--wpl-accent": accent, "--wpl-paper": paper, "--wpl-ink": ink }}
       onPointerMove={onMove}
       onPointerLeave={onLeave}
@@ -484,12 +558,31 @@ export default function WavingPortfolioLanding({
       <div className="wpl-stage" key={run}>
         <svg className="wpl-poster" viewBox={"0 0 " + L.width + " " + L.height} preserveAspectRatio="xMidYMid meet">
           <g className="wpl-par-lines" aria-hidden="true">
-            <text className="wpl-label" x={L.margin} y={73}>{nameT}</text>
-            <text className="wpl-label" x={L.width - L.margin} y={73} textAnchor="end">{yearT}</text>
-            <Rule a={nameEnd} b={yearStart} y={62} mid delay={2.55} color={accent} />
-            <text className="wpl-label" x={L.margin} y={663}>{roleLT}</text>
-            <text className="wpl-label" x={L.width - L.margin} y={663} textAnchor="end">{roleRT}</text>
-            <Rule a={roleLEnd} b={roleRStart} y={652} delay={2.75} color={accent} />
+            {compact ? (
+              <>
+                <text className="wpl-label" x={L.margin} y={92} style={{ fontSize: nameSize }}>{nameT}</text>
+                <text className="wpl-label" x={L.width - L.margin} y={146} textAnchor="end">{yearT}</text>
+                <Rule a={L.margin + 6} b={yearStart} y={133} mid delay={2.55} color={accent} />
+              </>
+            ) : (
+              <>
+                <text className="wpl-label" x={L.margin} y={73}>{nameT}</text>
+                <text className="wpl-label" x={L.width - L.margin} y={73} textAnchor="end">{yearT}</text>
+                <Rule a={nameEnd} b={yearStart} y={62} mid delay={2.55} color={accent} />
+              </>
+            )}
+            {compact ? (
+              <>
+                <text className="wpl-label" x={L.margin} y={L.bottom + 68}>{roleLT}</text>
+                <text className="wpl-label" x={L.width - L.margin} y={L.bottom + 112} textAnchor="end">{roleRT}</text>
+              </>
+            ) : (
+              <>
+                <text className="wpl-label" x={L.margin} y={L.bottom + 83}>{roleLT}</text>
+                <text className="wpl-label" x={L.width - L.margin} y={L.bottom + 83} textAnchor="end">{roleRT}</text>
+                <Rule a={roleLEnd} b={roleRStart} y={L.bottom + 72} delay={2.75} color={accent} />
+              </>
+            )}
           </g>
 
           <g className="wpl-par-letters" aria-hidden="true">
@@ -508,7 +601,7 @@ export default function WavingPortfolioLanding({
           </g>
 
           <g className="wpl-par-char">
-            <svg x={charLeft} y={605 - 600 * k} width={460 * k} height={600 * k} viewBox="0 0 460 600" overflow="hidden">
+            <svg x={charLeft} y={charTop} width={460 * k} height={600 * k} viewBox="0 0 460 600" overflow="hidden">
               <g
                 className={"wpl-char" + (waving ? " is-waving" : "")}
                 role="button"
@@ -529,7 +622,7 @@ export default function WavingPortfolioLanding({
             <g className="wpl-bubble" aria-hidden="true">
               <path
                 d={
-                  "M " + (charLeft + 372 * k) + " 20 h " + bubbleW + " v 56 h " + -(bubbleW - 34) +
+                  "M " + bubbleX + " " + bubbleY + " h " + bubbleW + " v 56 h " + -(bubbleW - 34) +
                   " l -30 22 l 6 -22 h -10 Z"
                 }
                 fill={paper}
@@ -537,7 +630,7 @@ export default function WavingPortfolioLanding({
                 strokeWidth={4}
                 strokeLinejoin="round"
               />
-              <text className="wpl-label wpl-bubble-text" x={charLeft + 372 * k + bubbleW / 2} y={58} textAnchor="middle">
+              <text className="wpl-label wpl-bubble-text" x={bubbleX + bubbleW / 2} y={bubbleY + 38} textAnchor="middle">
                 {greeting.toUpperCase()}
               </text>
             </g>
@@ -907,6 +1000,8 @@ const WPL_CSS = `
 .wpl-poster{position:absolute;left:3%;top:10%;width:94%;height:70%;max-width:none;overflow:visible;z-index:2}
 .wpl-label{font-family:"Futura","Century Gothic","Avenir Next","Trebuchet MS",ui-sans-serif,system-ui,sans-serif;font-weight:700;font-size:30px;letter-spacing:.04em;fill:var(--wpl-accent)}
 .wpl-bubble-text{fill:var(--wpl-ink);font-size:26px}
+.wpl-root[data-compact="1"] .wpl-label{font-size:40px}
+.wpl-root[data-compact="1"] .wpl-bubble-text{font-size:32px}
 .wpl-par-letters{transform:translate(calc(var(--wpl-mx,0) * -14px),calc(var(--wpl-my,0) * -8px));transition:transform .7s cubic-bezier(.2,.8,.2,1)}
 .wpl-par-lines{transform:translate(calc(var(--wpl-mx,0) * -5px),calc(var(--wpl-my,0) * -3px));transition:transform .7s cubic-bezier(.2,.8,.2,1)}
 .wpl-par-char{transform:translate(calc(var(--wpl-mx,0) * 9px),0px);transition:transform .7s cubic-bezier(.2,.8,.2,1)}
@@ -972,8 +1067,10 @@ const WPL_CSS = `
 .wpl-burst{position:absolute;width:0;height:0;pointer-events:none;z-index:6}
 .wpl-bit{position:absolute;left:-9px;top:-18px;width:18px;height:36px;max-width:none;overflow:visible;animation:wpl-bit .95s cubic-bezier(.15,.7,.3,1) forwards}
 
+/* Portrait / mobile: the poster is a tall grid, so give it the full height. */
 @container (max-aspect-ratio: 9/10){
-.wpl-poster{left:2%;width:96%;top:12%;height:66%}
+.wpl-poster{left:2%;width:96%;top:8.5%;height:79%}
+.wpl-sign{bottom:clamp(8px,2cqh,28px)}
 }
 
 @keyframes wpl-roll{
