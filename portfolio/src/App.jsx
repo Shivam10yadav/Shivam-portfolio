@@ -66,6 +66,9 @@ import WavingPortfolioLanding from "./components/WavingPortfolioLanding";
 import GithubActivity from "./components/GithubActivity";
 import Dock from "./components/Dock";
 import TechStack from "./components/TechStack";
+import Journey from "./components/Journey";
+import Toolbox from "./components/Toolbox";
+import Services from "./components/Toolbox";
 
 
 
@@ -832,53 +835,9 @@ function Portfolio({ theme, toggleTheme }) {
 
 
         {/* journey */}
-        <Section
-          id="journey"
-          title="My Journey"
-          subtitle="Every year brought new challenges, skills, and milestones."
-          index={4}
-        >
-          <div className="relative mx-auto max-w-4xl">
-            <div className="absolute left-8 top-0 h-full w-px bg-gradient-to-b from-neutral-300 via-neutral-200 to-transparent dark:from-neutral-700 dark:via-neutral-800" />
-
-            {journey.map((item, i) => (
-              <motion.div
-                key={item.year}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true }}
-                variants={fadeUp}
-                className="relative flex gap-8 pb-16 last:pb-0"
-              >
-                <div className="relative z-10 flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-xl">
-                  <span className="text-sm font-bold">
-                    {item.year.slice(2)}
-                  </span>
-                </div>
-
-                <motion.div
-                  whileHover={{ y: -6 }}
-                  className="flex-1 rounded-3xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-7 transition-all duration-300 hover:shadow-2xl"
-                >
-                  <span className="text-xs uppercase tracking-[0.25em] text-neutral-400">
-                    {item.year}
-                  </span>
-
-                  <h3
-                    className="mt-3 text-2xl font-semibold"
-                    style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-                  >
-                    {item.title}
-                  </h3>
-
-                  <p className="mt-4 leading-8 text-neutral-500 dark:text-neutral-400">
-                    {item.description}
-                  </p>
-                </motion.div>
-              </motion.div>
-            ))}
-          </div>
-        </Section>
+      <Section id="journey" title="My Journey" subtitle="Every year brought new challenges, skills, and milestones." index={4}>
+  <Journey journey={journey} />
+</Section>
 
         {/* process */}
         <Section
@@ -945,48 +904,9 @@ function Portfolio({ theme, toggleTheme }) {
           </div>
         </Section>
 
-        {/* toolbox */}
-        <Section
-          id="toolbox"
-          title="Toolbox"
-          subtitle="Technologies I use to design, build, test, and deploy modern web applications."
-          index={6}
-        >
-          <div className="flex flex-wrap justify-center gap-4 max-w-5xl mx-auto px-4">
-            {toolbox.map((tool, i) => (
-              <motion.div
-                key={tool.title}
-                initial={{ opacity: 0, y: 25 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.05, duration: 0.4, ease: "easeOut" }}
-                animate={{ y: [0, -4, 0] }}
-                whileHover={{ scale: 1.05, rotate: i % 2 === 0 ? -2 : 2 }}
-                className="group relative flex w-[150px] flex-col items-center rounded-2xl border border-neutral-200 dark:border-neutral-800/80 bg-white dark:bg-neutral-900/50 backdrop-blur-sm px-4 py-5 text-center shadow-sm transition-all duration-300 hover:border-blue-500/40 dark:hover:border-violet-500/40 hover:shadow-md hover:shadow-blue-500/5 dark:hover:shadow-violet-500/5"
-              >
-                <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-blue-500/0 to-violet-500/0 opacity-0 transition-opacity duration-300 group-hover:from-blue-500/[0.02] group-hover:to-violet-500/[0.02] group-hover:opacity-100" />
-
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-neutral-50 dark:bg-neutral-800/50 transition-colors duration-300 group-hover:bg-neutral-100 dark:group-hover:bg-neutral-800">
-                  <tool.icon
-                    size={22}
-                    className="text-neutral-700 dark:text-neutral-300 transition-colors duration-300 group-hover:text-blue-500 dark:group-hover:text-violet-400"
-                  />
-                </div>
-
-                <h3
-                  className="mt-4 text-sm font-semibold tracking-tight text-neutral-900 dark:text-neutral-100"
-                  style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-                >
-                  {tool.title}
-                </h3>
-
-                <p className="mt-1 text-xs leading-normal text-neutral-400 dark:text-neutral-500">
-                  {tool.description}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-        </Section>
+<Section id="toolbox" title="Toolbox" subtitle="..." index={6}>
+  <Toolbox toolbox={toolbox} />
+</Section>
 
         {/* education */}
         <Section
