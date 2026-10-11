@@ -6,6 +6,7 @@ import {
   useSpring,
   useMotionValue,
 } from "framer-motion";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import {
   FaHome,
@@ -69,6 +70,7 @@ import TechStack from "./components/TechStack";
 import Journey from "./components/Journey";
 import Toolbox from "./components/Toolbox";
 import Services from "./components/Toolbox";
+import NotFound from "./components/NotFound";
 
 
 
@@ -1083,8 +1085,12 @@ function Portfolio({ theme, toggleTheme }) {
 
 
 
+// import Portfolio from "./Portfolio";  // however you already import it
+
+
+// import Portfolio from "./Portfolio";  // however you already import it
+
 export default function App() {
-  const [showIntro, setShowIntro] = useState(true);
   const [theme, setTheme] = useState("light");
 
   React.useEffect(() => {
@@ -1103,8 +1109,11 @@ export default function App() {
   const toggleTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
 
   return (
-    <>
-      <Portfolio theme={theme} toggleTheme={toggleTheme} />
-    </>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Portfolio theme={theme} toggleTheme={toggleTheme} />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
