@@ -823,9 +823,10 @@ export default function WavingPortfolioLanding({
         <button type="button" className="wpl-gate" onClick={enter} autoFocus aria-label={enterText + ", sound on"}>
           <span className="wpl-gate-ring">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4Z" />
-              <path d="M15.5 9a4 4 0 0 1 0 6" />
-              <path d="M18.2 6.5a8 8 0 0 1 0 11" />
+            <path d="M18 11V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2" />
+<path d="M14 10V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2" />
+<path d="M10 10.5V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2v8" />
+<path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15" />
             </svg>
           </span>
           <span className="wpl-gate-text">{enterText.toUpperCase()}</span>
@@ -1344,7 +1345,8 @@ const WPL_CSS = `
 .wpl-root[data-intro="on"] .wpl-gate{position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;margin:0;padding:0;border:0;background:var(--wpl-paper);color:var(--wpl-accent);cursor:pointer}
 .wpl-gate-ring{position:relative;display:grid;place-items:center;width:84px;height:84px;border:3px solid currentColor;border-radius:50%}
 .wpl-gate-ring::after{content:"";position:absolute;inset:-3px;border:3px solid currentColor;border-radius:50%;animation:wpl-ring 1.8s ease-out infinite}
-.wpl-gate-ring svg{width:34px;height:34px}
+.wpl-gate-ring svg{width:34px;height:34px;transform-origin:60% 90%;animation:wpl-hello 1.6s ease-in-out infinite}
+@keyframes wpl-hello{0%,100%{transform:rotate(0deg)}25%{transform:rotate(-14deg)}50%{transform:rotate(12deg)}75%{transform:rotate(-8deg)}}
 .wpl-gate-text{font-family:"Futura","Century Gothic","Avenir Next","Trebuchet MS",ui-sans-serif,system-ui,sans-serif;font-weight:700;font-size:clamp(14px,4.4vw,20px);letter-spacing:.22em;padding-left:.22em;text-align:center;max-width:min(86%,520px);line-height:1.5;text-wrap:balance}
 .wpl-burst{position:absolute;width:0;height:0;pointer-events:none;z-index:6}
 .wpl-bit{position:absolute;left:-9px;top:-18px;width:18px;height:36px;max-width:none;overflow:visible;animation:wpl-bit .95s cubic-bezier(.15,.7,.3,1) forwards}
