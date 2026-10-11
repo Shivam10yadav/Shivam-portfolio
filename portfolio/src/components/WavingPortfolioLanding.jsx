@@ -9,6 +9,178 @@ import * as React from "react";
 
 const useIsoLayoutEffect = typeof window !== "undefined" ? React.useLayoutEffect : React.useEffect;
 
+// #region sound
+// All sounds are synthesised with the Web Audio API — no audio files to load.
+// Browsers keep audio locked until the visitor taps / clicks / presses a key,
+// so the first intro on a cold page load may be silent; any replay is audible.
+const sfx = (() => {
+  let ctx = null;
+  let master = null;
+  let noise = null;
+  const api = { state: { enabled: true, unlocked: false }, onChange: null };
+
+  const ensure = () => {
+    if (typeof window === "undefined") return null;
+    if (!ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      ctx = new AC();
+      master = ctx.createGain();
+      master.gain.value = 0.6;
+      const comp = ctx.createDynamicsCompressor();
+      master.connect(comp);
+      comp.connect(ctx.destination);
+      const len = Math.floor(ctx.sampleRate * 0.3);
+      noise = ctx.createBuffer(1, len, ctx.sampleRate);
+      const d = noise.getChannelData(0);
+      for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    }
+    return ctx;
+  };
+
+  const live = () => api.state.enabled && ctx && ctx.state === "running";
+
+  api.unlock = () => {
+    const c = ensure();
+    if (!c) return Promise.resolve(false);
+    const done = () => {
+      api.state.unlocked = c.state === "running";
+      if (api.onChange) api.onChange();
+      return api.state.unlocked;
+    };
+    if (c.state === "running") return Promise.resolve(done());
+    return c.resume().then(done, () => false);
+  };
+  api.setEnabled = (v) => {
+    api.state.enabled = v;
+  };
+
+  // a small mechanical click: band-passed noise + a tiny wooden "tock"
+  api.click = (freq = 3200, vol = 0.5, len = 0.03) => {
+    if (!live()) return;
+    const t = ctx.currentTime;
+    const src = ctx.createBufferSource();
+    src.buffer = noise;
+    src.playbackRate.value = 0.9 + Math.random() * 0.2;
+    const bp = ctx.createBiquadFilter();
+    bp.type = "bandpass";
+    bp.frequency.value = freq * (0.92 + Math.random() * 0.16);
+    bp.Q.value = 1.4;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+    src.connect(bp);
+    bp.connect(g);
+    g.connect(master);
+    src.start(t, Math.random() * 0.2, len + 0.01);
+
+    const o = ctx.createOscillator();
+    o.type = "triangle";
+    o.frequency.setValueAtTime(freq / 9, t);
+    o.frequency.exponentialRampToValueAtTime(freq / 20, t + 0.04);
+    const og = ctx.createGain();
+    og.gain.setValueAtTime(vol * 0.5, t);
+    og.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
+    o.connect(og);
+    og.connect(master);
+    o.start(t);
+    o.stop(t + 0.06);
+  };
+
+  // low thump (the poster landing)
+  api.thud = (vol = 0.7) => {
+    if (!live()) return;
+    const t = ctx.currentTime;
+    const o = ctx.createOscillator();
+    o.type = "sine";
+    o.frequency.setValueAtTime(130, t);
+    o.frequency.exponentialRampToValueAtTime(42, t + 0.28);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.32);
+    o.connect(g);
+    g.connect(master);
+    o.start(t);
+    o.stop(t + 0.35);
+  };
+
+  // soft rising pop (the speech bubble)
+  api.blip = (freq = 520, vol = 0.22) => {
+    if (!live()) return;
+    const t = ctx.currentTime;
+    const o = ctx.createOscillator();
+    o.type = "sine";
+    o.frequency.setValueAtTime(freq, t);
+    o.frequency.exponentialRampToValueAtTime(freq * 1.7, t + 0.09);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.14);
+    o.connect(g);
+    g.connect(master);
+    o.start(t);
+    o.stop(t + 0.16);
+  };
+
+  // short airy sweep (the character sliding up)
+  api.whoosh = () => {
+    if (!live()) return;
+    const t = ctx.currentTime;
+    const src = ctx.createBufferSource();
+    src.buffer = noise;
+    src.loop = true;
+    const bp = ctx.createBiquadFilter();
+    bp.type = "bandpass";
+    bp.Q.value = 0.8;
+    bp.frequency.setValueAtTime(300, t);
+    bp.frequency.exponentialRampToValueAtTime(2400, t + 0.5);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.14, t + 0.22);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.6);
+    src.connect(bp);
+    bp.connect(g);
+    g.connect(master);
+    src.start(t);
+    src.stop(t + 0.65);
+  };
+
+  // quick rustle (a row of letters sliding in)
+  api.swish = (vol = 0.12) => {
+    if (!live()) return;
+    const t = ctx.currentTime;
+    const src = ctx.createBufferSource();
+    src.buffer = noise;
+    const bp = ctx.createBiquadFilter();
+    bp.type = "bandpass";
+    bp.Q.value = 1.1;
+    bp.frequency.setValueAtTime(700, t);
+    bp.frequency.exponentialRampToValueAtTime(3200, t + 0.16);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.04);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.2);
+    src.connect(bp);
+    bp.connect(g);
+    g.connect(master);
+    src.start(t, Math.random() * 0.1, 0.22);
+  };
+
+  return api;
+})();
+
+// A reel/clock ratchet: `steps` clicks across `dur` ms. Gaps are widest at the
+// start and end and tightest in the middle, matching a reel that speeds up and
+// slows down. `add(ms, fn)` schedules a callback.
+function ratchet(add, start, dur, steps, freq, vol) {
+  for (let k = 0; k < steps; k++) {
+    const x = (k + 0.5) / steps;
+    const t = start + dur * (0.5 + Math.asin(2 * x - 1) / Math.PI);
+    add(t, () => sfx.click(freq + k * 40, vol));
+  }
+}
+// #endregion sound
+
 // #region glyphs
 const WIDE = { A: 1.04, M: 1.3, N: 1.04, Q: 1.02, V: 1.04, W: 1.44, X: 1.02 };
 
@@ -259,7 +431,7 @@ const WAVE_MS = 1500;
 
 function useScramble(text, startAt, token, active) {
   const [out, setOut] = React.useState(active ? "" : text);
-  React.useEffect(() => {
+  useIsoLayoutEffect(() => {
     if (!active) {
       setOut(text);
       return;
@@ -295,7 +467,7 @@ function useScramble(text, startAt, token, active) {
  * Props:
  *  name, year, roles [left, right], lettersLeft [top, bottom], giantLetter,
  *  lettersRight [top, bottom], title, signature, greeting,
- *  accent, paper, ink, intro, height, className
+ *  accent, paper, ink, intro, sound (default true), enterText (start-screen wording), height, className
  */
 export default function WavingPortfolioLanding({
   name = "Kedhareswer",
@@ -311,6 +483,8 @@ export default function WavingPortfolioLanding({
   paper = "#f6f4f0",
   ink = "#141414",
   intro = true,
+  sound = true,
+  enterText = "Tap to say Hi",
   height = "100svh",
   className = "",
 }) {
@@ -332,6 +506,10 @@ export default function WavingPortfolioLanding({
   const [diceSpin, setDiceSpin] = React.useState([0, 0]);
   const [bursts, setBursts] = React.useState([]);
   const [compact, setCompact] = React.useState(false);
+  // The intro (and its sound) starts once `entered`. If the browser allows audio
+  // straight away it starts at once; otherwise a one-tap start screen is shown.
+  const [entered, setEntered] = React.useState(!(intro && sound));
+  const [gate, setGate] = React.useState(false);
 
   const later = (fn, ms) => {
     const id = window.setTimeout(fn, ms);
@@ -350,6 +528,33 @@ export default function WavingPortfolioLanding({
       cancelAnimationFrame(frame.current);
     };
   }, []);
+
+  // Sound is on from the first frame. Ask the browser for audio straight away:
+  // if it allows autoplay (or the visitor already interacted with the site) the
+  // intro starts immediately with sound. If not, show the one-tap start screen —
+  // the tap is what makes the browser allow audio, so the intro then plays with
+  // sound from its very first letter.
+  React.useEffect(() => {
+    sfx.setEnabled(sound);
+    if (!sound) return;
+    let off = false;
+    sfx.unlock().then((ok) => {
+      if (!off && ok) setEntered(true);
+    });
+    const show = window.setTimeout(() => setGate(true), 250);
+    const unlock = () => sfx.unlock();
+    const evs = ["pointerdown", "keydown", "touchend"];
+    evs.forEach((e) => window.addEventListener(e, unlock, { passive: true }));
+    return () => {
+      off = true;
+      clearTimeout(show);
+      evs.forEach((e) => window.removeEventListener(e, unlock));
+    };
+  }, [sound]);
+
+  const enter = () => {
+    sfx.unlock().then(() => setEntered(true));
+  };
 
   // Measure before first paint so mobile never flashes the desktop layout.
   useIsoLayoutEffect(() => {
@@ -374,6 +579,7 @@ export default function WavingPortfolioLanding({
     if (wavingRef.current) return;
     wavingRef.current = true;
     setWaving(true);
+    sfx.blip();
     later(() => {
       wavingRef.current = false;
       setWaving(false);
@@ -384,16 +590,18 @@ export default function WavingPortfolioLanding({
   React.useEffect(() => {
     if (!playing) {
       setReady(true);
+      setEntered(true);
       return;
     }
     setReady(false);
+    if (!entered) return;
     const a = later(wave, WAVE_AT);
     const b = later(() => setReady(true), READY_AT);
     return () => {
       clearTimeout(a);
       clearTimeout(b);
     };
-  }, [run, playing, wave]);
+  }, [run, playing, wave, entered]);
 
   const L = React.useMemo(
     () => layoutPoster(lettersLeft, giantLetter, lettersRight, compact),
@@ -406,10 +614,60 @@ export default function WavingPortfolioLanding({
   const yearU = year.toUpperCase();
   const roleL = (roles[0] ?? "").toUpperCase();
   const roleR = (roles[1] ?? "").toUpperCase();
-  const nameT = useScramble(nameU, SCRAMBLE_AT, run, playing);
-  const yearT = useScramble(yearU, SCRAMBLE_AT + 250, run, playing);
-  const roleLT = useScramble(roleL, SCRAMBLE_AT + 150, run, playing);
-  const roleRT = useScramble(roleR, SCRAMBLE_AT + 400, run, playing);
+  const nameT = useScramble(nameU, SCRAMBLE_AT, run, playing && entered);
+  const yearT = useScramble(yearU, SCRAMBLE_AT + 250, run, playing && entered);
+  const roleLT = useScramble(roleL, SCRAMBLE_AT + 150, run, playing && entered);
+  const roleRT = useScramble(roleR, SCRAMBLE_AT + 400, run, playing && entered);
+
+  // Intro soundtrack, timed to the CSS animations: a reel ratchet per letter,
+  // a landing click as each one settles, the poster thump, one tick per
+  // resolved character of the scrambling labels, and the character's whoosh.
+  const introRef = React.useRef({});
+  introRef.current = {
+    cells: L.cells,
+    width: L.width,
+    texts: [
+      [nameU, SCRAMBLE_AT],
+      [yearU, SCRAMBLE_AT + 250],
+      [roleL, SCRAMBLE_AT + 150],
+      [roleR, SCRAMBLE_AT + 400],
+    ],
+  };
+  React.useEffect(() => {
+    if (!playing || !entered) return;
+    const ids = [];
+    const add = (ms, fn) => ids.push(window.setTimeout(fn, ms));
+    const { cells, width, texts } = introRef.current;
+
+    // Loading screen (the storm of scrolling letters, 0 - 2s):
+    //  rows rustle in, letters flicker faster and faster, then the rows
+    //  shut one after another with a clack and a low thump.
+    for (let r = 0; r < 7; r++) add(r * 40, () => sfx.swish(0.11));
+    const flips = 46;
+    for (let k = 0; k < flips; k++) {
+      const x = k / flips;
+      const t = 120 + 1150 * (1 - Math.pow(1 - x, 1.7));
+      add(t, () => sfx.click(3400 + Math.random() * 3200, 0.1 + x * 0.08, 0.012));
+    }
+    for (let r = 0; r < 7; r++) {
+      add(1380 + r * 60, () => sfx.click(900 + Math.random() * 300, 0.34, 0.05));
+    }
+    add(1850, () => sfx.thud(0.4));
+    cells.forEach((c, i) => {
+      const delay = (c.giant ? 1.75 : 1 + (c.x / width) * 0.55 + c.row * 0.1) * 1000;
+      const dur = (c.giant ? 0.85 : 1) * 1000;
+      ratchet(add, delay, dur * 0.8, c.giant ? 12 : 8, 2600 + hash(i * 7) * 1600, 0.2);
+      add(delay + dur * 0.84, () => sfx.click(1500, 0.42, 0.05));
+    });
+    add(2500, () => sfx.thud());
+    texts.forEach(([txt, at]) => {
+      for (let k = 0; k < txt.length; k++) {
+        if (txt[k] !== " ") add(at + k * 30 + 320, () => sfx.click(5200, 0.16, 0.014));
+      }
+    });
+    add(3400, () => sfx.whoosh());
+    return () => ids.forEach(clearTimeout);
+  }, [run, playing, entered]);
 
   const sig = React.useMemo(() => {
     if (signature) return signature.toUpperCase().split("/").slice(0, 2);
@@ -465,6 +723,7 @@ export default function WavingPortfolioLanding({
   const onDown = (e) => {
     if (reduced) return;
     if (e.target.closest("button,.wpl-char,.wpl-cell")) return;
+    sfx.click(4800, 0.3, 0.03);
     const r = rootRef.current?.getBoundingClientRect();
     if (!r) return;
     const bits = Array.from({ length: 10 }, (_, i) => {
@@ -487,6 +746,8 @@ export default function WavingPortfolioLanding({
     const now = performance.now();
     if (now - (lastRoll.current[i] ?? 0) < 750) return;
     lastRoll.current[i] = now;
+    ratchet((ms, fn) => later(fn, ms), 0, 600, 6, 2800, 0.28);
+    later(() => sfx.click(1500, 0.4, 0.05), 640);
     setRolls((r) => {
       const n = [...r];
       n[i] = (n[i] ?? 0) + 1;
@@ -495,6 +756,8 @@ export default function WavingPortfolioLanding({
   };
 
   const rollDie = (k) => {
+    ratchet((ms, fn) => later(fn, ms), 0, 420, 6, 2200, 0.34);
+    later(() => sfx.thud(0.5), 470);
     setDice((d) => {
       const n = [d[0], d[1]];
       let v = n[k];
@@ -506,6 +769,7 @@ export default function WavingPortfolioLanding({
   };
 
   const replay = () => {
+    sfx.unlock();
     setRolls([]);
     setBursts([]);
     wavingRef.current = false;
@@ -555,7 +819,20 @@ export default function WavingPortfolioLanding({
         {name}, {roles.filter(Boolean).join(" and ")}, {year}
       </p>
 
-      <div className="wpl-stage" key={run}>
+      {!entered && gate && (
+        <button type="button" className="wpl-gate" onClick={enter} autoFocus aria-label={enterText + ", sound on"}>
+          <span className="wpl-gate-ring">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4Z" />
+              <path d="M15.5 9a4 4 0 0 1 0 6" />
+              <path d="M18.2 6.5a8 8 0 0 1 0 11" />
+            </svg>
+          </span>
+          <span className="wpl-gate-text">{enterText.toUpperCase()}</span>
+        </button>
+      )}
+
+      <div className="wpl-stage" key={run} style={entered ? undefined : { display: "none" }}>
         <svg className="wpl-poster" viewBox={"0 0 " + L.width + " " + L.height} preserveAspectRatio="xMidYMid meet">
           <g className="wpl-par-lines" aria-hidden="true">
             {compact ? (
@@ -1064,6 +1341,11 @@ const WPL_CSS = `
 .wpl-sign svg{display:block;width:100%;height:100%;max-width:none;overflow:visible}
 .wpl-root button:focus-visible{outline:2px solid var(--wpl-accent);outline-offset:4px}
 
+.wpl-root[data-intro="on"] .wpl-gate{position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;margin:0;padding:0;border:0;background:var(--wpl-paper);color:var(--wpl-accent);cursor:pointer}
+.wpl-gate-ring{position:relative;display:grid;place-items:center;width:84px;height:84px;border:3px solid currentColor;border-radius:50%}
+.wpl-gate-ring::after{content:"";position:absolute;inset:-3px;border:3px solid currentColor;border-radius:50%;animation:wpl-ring 1.8s ease-out infinite}
+.wpl-gate-ring svg{width:34px;height:34px}
+.wpl-gate-text{font-family:"Futura","Century Gothic","Avenir Next","Trebuchet MS",ui-sans-serif,system-ui,sans-serif;font-weight:700;font-size:clamp(14px,4.4vw,20px);letter-spacing:.22em;padding-left:.22em;text-align:center;max-width:min(86%,520px);line-height:1.5;text-wrap:balance}
 .wpl-burst{position:absolute;width:0;height:0;pointer-events:none;z-index:6}
 .wpl-bit{position:absolute;left:-9px;top:-18px;width:18px;height:36px;max-width:none;overflow:visible;animation:wpl-bit .95s cubic-bezier(.15,.7,.3,1) forwards}
 
@@ -1073,6 +1355,7 @@ const WPL_CSS = `
 .wpl-sign{bottom:clamp(8px,2cqh,28px)}
 }
 
+@keyframes wpl-ring{from{transform:scale(1);opacity:.7}to{transform:scale(1.6);opacity:0}}
 @keyframes wpl-roll{
 0%{transform:translateY(var(--dist));opacity:0;animation-timing-function:cubic-bezier(.5,0,.25,1)}
 6%{opacity:1}
