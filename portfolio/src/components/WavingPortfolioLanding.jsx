@@ -6,6 +6,7 @@
 // standing at the bottom-right, so the letters render ~2.5x larger than
 // squeezing the wide desktop layout. The desktop layout is untouched.
 import * as React from "react";
+import { createGarden } from "./flowerGarden";
 
 const useIsoLayoutEffect = typeof window !== "undefined" ? React.useLayoutEffect : React.useEffect;
 
@@ -496,6 +497,10 @@ export default function WavingPortfolioLanding({
   const lastRoll = React.useRef([]);
   const burstId = React.useRef(0);
   const wavingRef = React.useRef(false);
+  const svgRef = React.useRef(null);
+  const gardenBackRef = React.useRef(null);
+  const gardenFrontRef = React.useRef(null);
+  const gardenRef = React.useRef(null);
 
   const [run, setRun] = React.useState(0);
   const [reduced, setReduced] = React.useState(false);
@@ -610,6 +615,34 @@ export default function WavingPortfolioLanding({
   );
   const letters = L.cells.map((c) => c.ch).join("") || "ABC";
 
+  // Flower garden (Type Garden's growth engine). Draws behind and in front of the
+  // letters on two canvases that share the poster's coordinate system.
+  React.useEffect(() => {
+    const g = createGarden({ density: 1, boil: true });
+    g.attach({ root: rootRef, svg: svgRef, back: gardenBackRef, front: gardenFrontRef });
+    gardenRef.current = g;
+    g.start();
+    return () => {
+      g.destroy();
+      gardenRef.current = null;
+    };
+  }, []);
+  React.useEffect(() => {
+    // every rose gets its own colour; stems and leaves are greens (override via the palette/leaves arrays)
+    gardenRef.current?.setColors({ vein: paper });
+  }, [paper]);
+  React.useEffect(() => {
+    gardenRef.current?.setStatic(reduced);
+  }, [reduced]);
+  React.useEffect(() => {
+    gardenRef.current?.setLayout(L.cells, L.width, L.height);
+  }, [L]);
+  // (re)plant when the intro starts / replays; flowers begin once the letters have landed
+  React.useEffect(() => {
+    if (!entered) return;
+    gardenRef.current?.restart(performance.now() + (playing ? 3000 : 150));
+  }, [entered, run, playing]);
+
   const nameU = name.toUpperCase();
   const yearU = year.toUpperCase();
   const roleL = (roles[0] ?? "").toUpperCase();
@@ -693,6 +726,7 @@ export default function WavingPortfolioLanding({
 
   const onMove = (e) => {
     if (reduced || e.pointerType === "touch") return;
+    gardenRef.current?.setPointer(e.clientX, e.clientY);
     const px = e.clientX;
     const py = e.clientY;
     cancelAnimationFrame(frame.current);
@@ -714,6 +748,7 @@ export default function WavingPortfolioLanding({
   };
 
   const onLeave = () => {
+    gardenRef.current?.setPointer(null);
     const root = rootRef.current;
     if (!root) return;
     for (const v of ["--wpl-mx", "--wpl-my", "--wpl-ex", "--wpl-ey", "--wpl-hr"])
@@ -722,6 +757,10 @@ export default function WavingPortfolioLanding({
 
   const onDown = (e) => {
     if (reduced) return;
+    if (e.pointerType === "touch") {
+      gardenRef.current?.setPointer(e.clientX, e.clientY);
+      later(() => gardenRef.current?.setPointer(null), 1400);
+    }
     if (e.target.closest("button,.wpl-char,.wpl-cell")) return;
     sfx.click(4800, 0.3, 0.03);
     const r = rootRef.current?.getBoundingClientRect();
@@ -746,6 +785,7 @@ export default function WavingPortfolioLanding({
     const now = performance.now();
     if (now - (lastRoll.current[i] ?? 0) < 750) return;
     lastRoll.current[i] = now;
+    gardenRef.current?.regrow(i);
     ratchet((ms, fn) => later(fn, ms), 0, 600, 6, 2800, 0.28);
     later(() => sfx.click(1500, 0.4, 0.05), 640);
     setRolls((r) => {
@@ -834,7 +874,8 @@ export default function WavingPortfolioLanding({
       )}
 
       <div className="wpl-stage" key={run} style={entered ? undefined : { display: "none" }}>
-        <svg className="wpl-poster" viewBox={"0 0 " + L.width + " " + L.height} preserveAspectRatio="xMidYMid meet">
+        <canvas ref={gardenBackRef} className="wpl-gcv wpl-gcv-b" aria-hidden="true" />
+        <svg ref={svgRef} className="wpl-poster" viewBox={"0 0 " + L.width + " " + L.height} preserveAspectRatio="xMidYMid meet">
           <g className="wpl-par-lines" aria-hidden="true">
             {compact ? (
               <>
@@ -914,6 +955,8 @@ export default function WavingPortfolioLanding({
             </g>
           )}
         </svg>
+
+        <canvas ref={gardenFrontRef} className="wpl-gcv wpl-gcv-f" aria-hidden="true" />
 
         {playing && !ready && (
           <div className="wpl-storm" aria-hidden="true">
@@ -1001,6 +1044,20 @@ export default function WavingPortfolioLanding({
       ))}
     </div>
   );
+}
+
+function mixHex(a, b, t) {
+  const p = (h) => {
+    const x = h.replace("#", "");
+    const f = x.length === 3 ? x.replace(/./g, "$&$&") : x;
+    return [0, 2, 4].map((i) => parseInt(f.slice(i, i + 2), 16));
+  };
+  try {
+    const A = p(a), B = p(b);
+    return "#" + A.map((v, i) => Math.round(v + (B[i] - v) * t).toString(16).padStart(2, "0")).join("");
+  } catch (e) {
+    return a;
+  }
 }
 
 function pips(n) {
@@ -1283,6 +1340,9 @@ const WPL_CSS = `
 .wpl-par-letters{transform:translate(calc(var(--wpl-mx,0) * -14px),calc(var(--wpl-my,0) * -8px));transition:transform .7s cubic-bezier(.2,.8,.2,1)}
 .wpl-par-lines{transform:translate(calc(var(--wpl-mx,0) * -5px),calc(var(--wpl-my,0) * -3px));transition:transform .7s cubic-bezier(.2,.8,.2,1)}
 .wpl-par-char{transform:translate(calc(var(--wpl-mx,0) * 9px),0px);transition:transform .7s cubic-bezier(.2,.8,.2,1)}
+.wpl-gcv{position:absolute;left:0;top:0;width:100%;height:100%;max-width:none;pointer-events:none;transform:translate(calc(var(--wpl-mx,0) * -14px),calc(var(--wpl-my,0) * -8px));transition:transform .7s cubic-bezier(.2,.8,.2,1)}
+.wpl-gcv-b{z-index:1}
+.wpl-gcv-f{z-index:3}
 .wpl-draw{stroke-dasharray:1;stroke-dashoffset:0}
 .wpl-dot{transform-box:fill-box;transform-origin:center}
 .wpl-reel.is-rolling{animation:wpl-roll var(--dur,1s) var(--delay,0s) both}
