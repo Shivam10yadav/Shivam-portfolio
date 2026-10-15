@@ -498,6 +498,12 @@ export default function WavingPortfolioLanding({
   const burstId = React.useRef(0);
   const wavingRef = React.useRef(false);
   const svgRef = React.useRef(null);
+  const parLettersRef = React.useRef(null);
+  const parLinesRef = React.useRef(null);
+  const parCharRef = React.useRef(null);
+  const readyRef = React.useRef(false);
+  const reducedRef = React.useRef(false);
+  const rerollRef = React.useRef(null);
   const gardenBackRef = React.useRef(null);
   const gardenFrontRef = React.useRef(null);
   const gardenRef = React.useRef(null);
@@ -735,24 +741,38 @@ export default function WavingPortfolioLanding({
       if (!root) return;
       const r = root.getBoundingClientRect();
       const k = (v, d) => Math.max(-1, Math.min(1, v / d));
-      root.style.setProperty("--wpl-mx", (((px - r.left) / r.width) * 2 - 1).toFixed(3));
-      root.style.setProperty("--wpl-my", (((py - r.top) / r.height) * 2 - 1).toFixed(3));
+      const mx = ((px - r.left) / r.width) * 2 - 1;
+      const my = ((py - r.top) / r.height) * 2 - 1;
       const h = headRef.current?.getBoundingClientRect();
+      // write straight to the few elements that move (instead of changing CSS variables on the
+      // root, which makes the browser re-check every node in the poster on every mouse move)
+      const mv = (el, x, y) => {
+        if (el) el.style.transform = "translate(" + x.toFixed(2) + "px," + y.toFixed(2) + "px)";
+      };
+      mv(parLettersRef.current, mx * -14, my * -8);
+      mv(parLinesRef.current, mx * -5, my * -3);
+      mv(parCharRef.current, mx * 9, 0);
+      mv(gardenBackRef.current, mx * -14, my * -8);
+      mv(gardenFrontRef.current, mx * -14, my * -8);
       if (!h) return;
       const dx = px - (h.left + h.width / 2);
       const dy = py - (h.top + h.height / 2);
-      root.style.setProperty("--wpl-ex", (k(dx, 260) * 4.5).toFixed(2));
-      root.style.setProperty("--wpl-ey", (k(dy, 260) * 3.5).toFixed(2));
-      root.style.setProperty("--wpl-hr", (k(dx, 700) * 7).toFixed(2));
+      const c = parCharRef.current;
+      if (c) {
+        c.style.setProperty("--wpl-ex", (k(dx, 260) * 4.5).toFixed(2));
+        c.style.setProperty("--wpl-ey", (k(dy, 260) * 3.5).toFixed(2));
+        c.style.setProperty("--wpl-hr", (k(dx, 700) * 7).toFixed(2));
+      }
     });
   };
 
   const onLeave = () => {
     gardenRef.current?.setPointer(null);
-    const root = rootRef.current;
-    if (!root) return;
-    for (const v of ["--wpl-mx", "--wpl-my", "--wpl-ex", "--wpl-ey", "--wpl-hr"])
-      root.style.setProperty(v, "0");
+    cancelAnimationFrame(frame.current);
+    for (const el of [parLettersRef.current, parLinesRef.current, parCharRef.current, gardenBackRef.current, gardenFrontRef.current])
+      if (el) el.style.transform = "translate(0px,0px)";
+    const c = parCharRef.current;
+    if (c) for (const v of ["--wpl-ex", "--wpl-ey", "--wpl-hr"]) c.style.setProperty(v, "0");
   };
 
   const onDown = (e) => {
@@ -781,7 +801,7 @@ export default function WavingPortfolioLanding({
   };
 
   const reroll = (i) => {
-    if (!ready || reduced) return;
+    if (!readyRef.current || reducedRef.current) return;
     const now = performance.now();
     if (now - (lastRoll.current[i] ?? 0) < 750) return;
     lastRoll.current[i] = now;
@@ -794,6 +814,10 @@ export default function WavingPortfolioLanding({
       return n;
     });
   };
+
+  rerollRef.current = reroll;
+  readyRef.current = ready;
+  reducedRef.current = reduced;
 
   const rollDie = (k) => {
     ratchet((ms, fn) => later(fn, ms), 0, 420, 6, 2200, 0.34);
@@ -876,7 +900,7 @@ export default function WavingPortfolioLanding({
       <div className="wpl-stage" key={run} style={entered ? undefined : { display: "none" }}>
         <canvas ref={gardenBackRef} className="wpl-gcv wpl-gcv-b" aria-hidden="true" />
         <svg ref={svgRef} className="wpl-poster" viewBox={"0 0 " + L.width + " " + L.height} preserveAspectRatio="xMidYMid meet">
-          <g className="wpl-par-lines" aria-hidden="true">
+          <g ref={parLinesRef} className="wpl-par-lines" aria-hidden="true">
             {compact ? (
               <>
                 <text className="wpl-label" x={L.margin} y={92} style={{ fontSize: nameSize }}>{nameT}</text>
@@ -904,7 +928,7 @@ export default function WavingPortfolioLanding({
             )}
           </g>
 
-          <g className="wpl-par-letters" aria-hidden="true">
+          <g ref={parLettersRef} className="wpl-par-letters" aria-hidden="true">
             {L.cells.map((c, i) => (
               <LetterCell
                 key={i}
@@ -914,12 +938,12 @@ export default function WavingPortfolioLanding({
                 intro={playing}
                 delay={c.giant ? 1.75 : 1 + (c.x / L.width) * 0.55 + c.row * 0.1}
                 color={accent}
-                onEnter={() => reroll(i)}
+                onEnter={() => rerollRef.current(i)}
               />
             ))}
           </g>
 
-          <g className="wpl-par-char">
+          <g ref={parCharRef} className="wpl-par-char">
             <svg x={charLeft} y={charTop} width={460 * k} height={600 * k} viewBox="0 0 460 600" overflow="hidden">
               <g
                 className={"wpl-char" + (waving ? " is-waving" : "")}
@@ -1092,7 +1116,7 @@ function Rule({ a, b, y, mid, delay, color }) {
   );
 }
 
-function LetterCell({ c, i, roll, intro, delay, color, onEnter }) {
+const LetterCell = React.memo(function LetterCell({ c, i, roll, intro, delay, color, onEnter }) {
   const pad = c.s;
   const pitch = c.h + c.s * 2 + 24;
   const n = roll > 0 ? 6 : c.giant ? 14 : 10;
@@ -1143,9 +1167,9 @@ function LetterCell({ c, i, roll, intro, delay, color, onEnter }) {
       </svg>
     </g>
   );
-}
+}, (a, b) => a.c === b.c && a.i === b.i && a.roll === b.roll && a.intro === b.intro && a.delay === b.delay && a.color === b.color);
 
-function Signature({ lines, color }) {
+const Signature = React.memo(function Signature({ lines, color }) {
   const H = 26;
   const S = 3.6;
   const G = 4;
@@ -1215,9 +1239,10 @@ function Signature({ lines, color }) {
     </svg>
   );
 }
+);
 
 // #region character
-function Character({ ink, paper, shirtId, headRef }) {
+const Character = React.memo(function Character({ ink, paper, shirtId, headRef }) {
   const torso =
     "M 120 240 C 134 222 166 213 202 213 C 240 213 272 221 290 238 C 300 285 298 345 292 392 C 288 440 288 478 290 520 L 120 520 C 120 478 118 440 114 392 C 108 345 108 285 120 240 Z";
   const limb = (d, w) => (
@@ -1326,6 +1351,8 @@ function Character({ ink, paper, shirtId, headRef }) {
     </g>
   );
 }
+);
+
 // #endregion character
 
 const WPL_CSS = `
@@ -1343,6 +1370,7 @@ const WPL_CSS = `
 .wpl-gcv{position:absolute;left:0;top:0;width:100%;height:100%;max-width:none;pointer-events:none;transform:translate(calc(var(--wpl-mx,0) * -14px),calc(var(--wpl-my,0) * -8px));transition:transform .7s cubic-bezier(.2,.8,.2,1)}
 .wpl-gcv-b{z-index:1}
 .wpl-gcv-f{z-index:3}
+.wpl-par-letters,.wpl-par-lines,.wpl-par-char,.wpl-breathe,.wpl-gcv{will-change:transform}
 .wpl-draw{stroke-dasharray:1;stroke-dashoffset:0}
 .wpl-dot{transform-box:fill-box;transform-origin:center}
 .wpl-reel.is-rolling{animation:wpl-roll var(--dur,1s) var(--delay,0s) both}

@@ -295,6 +295,10 @@ export function createGarden(opts = {}) {
   let raf = 0, lastNow = 0, startAt = 0, planted = false;
   const fa = {};             // per-rose face-turn smoothing
   const map = { k: 1, ox: 0, oy: 0, pw: 0, ph: 0 };
+  // render-on-demand: we only repaint when something can actually look different
+  let dirty = true, moving = false, lastFrameN = -1, visible = true, io = null, rectAge = 0;
+  let RQ = null, RR = null;   // cached root / svg rects (re-read every few frames, not every frame)
+  const SETTLE = 4500;        // ms after a flower's birth during which it may still be growing
 
   const cellSeed = (i, n) => sessionSeed + i * 131 + n * 7919;
   function buildCell(c, i, prevCell, ws) {
@@ -333,11 +337,11 @@ export function createGarden(opts = {}) {
 
   const api = {
     attach(r) { refs = r; },
-    setColors(c) { cc = { ...cc, ...c }; },
+    setColors(c) { cc = { ...cc, ...c }; dirty = true; },
     setBoil(v) { boil = v; },
-    setStatic(v) { isStatic = !!v; },
+    setStatic(v) { isStatic = !!v; dirty = true; },
     setLayout(src, w, hh) {
-      vbW = w; vbH = hh; compact = hh > w;
+      vbW = w; vbH = hh; compact = hh > w; dirty = true; rectAge = 0;
       const same = planted && src.length === cells.length && src.every((c, i) => c.ch === cells[i].ch && !!c.giant === cells[i].giant);
       if (same) {
         // geometry only (resize / compact toggle) — keep the same flowers
@@ -356,7 +360,7 @@ export function createGarden(opts = {}) {
     // (re)plant a fresh garden; roses/stems start growing from `start` (ms, performance.now clock)
     restart(start, fresh = true) {
       if (fresh) sessionSeed = (Math.random() * 1e9) | 0;
-      startAt = start;
+      startAt = start; dirty = true;
       const src = cells._src || [];
       cells = layoutCells(src);
       cells._src = src;
@@ -366,25 +370,41 @@ export function createGarden(opts = {}) {
     regrow(i, now = performance.now()) {
       const L = cells[i];
       if (!L) return;
-      L.n++;
+      L.n++; dirty = true;
       L.els = gen(L, cellSeed(i, L.n * 3 + 1));
       L.birth = now + 80;
     },
-    setPointer(x, y) { ptr = x == null ? null : [x, y]; },
+    setPointer(x, y) { ptr = x == null ? null : [x, y]; dirty = true; },
     start() {
       cancelAnimationFrame(raf);
+      if (io) { io.disconnect(); io = null; }
+      const rootEl = refs && refs.root.current;
+      if (rootEl && typeof IntersectionObserver !== 'undefined') {
+        // nothing to paint while the hero is scrolled out of view
+        io = new IntersectionObserver(([en]) => { visible = en.isIntersecting; if (visible) { dirty = true; rectAge = 0; } });
+        io.observe(rootEl);
+      }
       const loop = () => { raf = requestAnimationFrame(loop); api.frame(performance.now()); };
       loop();
     },
-    destroy() { cancelAnimationFrame(raf); },
+    destroy() { cancelAnimationFrame(raf); if (io) { io.disconnect(); io = null; } },
     frame(now) {
-      if (!refs) return;
+      if (!refs || !visible) return;
       const root = refs.root.current, svg = refs.svg.current, back = refs.back.current, front = refs.front.current;
       if (!root || !svg || !back || !front || !cells.length) return;
       const dt = Math.min(64, now - (lastNow || now)); lastNow = now;
-      const q = root.getBoundingClientRect(), r = svg.getBoundingClientRect();
-      if (!q.width || !q.height || !r.width) return;
-      const d = Math.min(2, window.devicePixelRatio || 1);
+      const frameN = boil && !isStatic ? Math.floor(now / 120) : 0;
+
+      // is there any reason to repaint? (growing, leaning, boil tick, or something changed)
+      let active = dirty || moving || frameN !== lastFrameN;
+      if (!active && !isStatic) for (const L of cells) if (now - L.birth < SETTLE) { active = true; break; }
+      if (!active) return;
+      dirty = false; lastFrameN = frameN;
+
+      if (!RQ || rectAge++ % 6 === 0) { RQ = root.getBoundingClientRect(); RR = svg.getBoundingClientRect(); }
+      const q = RQ, r = RR;
+      if (!q.width || !q.height || !r.width) { RQ = null; dirty = true; return; }
+      const d = Math.min(1.5, window.devicePixelRatio || 1);
       const pw = Math.round(q.width * d), ph = Math.round(q.height * d);
       for (const cv of [back, front]) { if (cv.width !== pw || cv.height !== ph) { cv.width = pw; cv.height = ph; } }
       const k = Math.min(r.width / vbW, r.height / vbH);
@@ -392,16 +412,7 @@ export function createGarden(opts = {}) {
       Object.assign(map, { k, ox, oy });
       const P = ptr ? [(ptr[0] - q.left - ox) / k, (ptr[1] - q.top - oy) / k] : null;
 
-      const kLean = 1 - Math.exp(-dt / 80);
-      const frameN = boil && !isStatic ? Math.floor(now / 120) : 0;
-      const ctxs = [back, front].map((cv) => {
-        const g = cv.getContext('2d');
-        g.setTransform(1, 0, 0, 1, 0, 0);
-        g.clearRect(0, 0, cv.width, cv.height);
-        g.setTransform(d * k, 0, 0, d * k, d * ox, d * oy);
-        return g;
-      });
-
+      let still = true; // flips to false while anything is still easing toward its target
       for (const L of cells) {
         // lean toward the pointer (Type Garden's near-pointer attraction)
         let tx = 0, ty = 0;
@@ -410,33 +421,74 @@ export function createGarden(opts = {}) {
           if (dd < reach && dd > 1) { const w = 1 - dd / reach, s = w * w * (3 - 2 * w); tx = (dx / dd) * s; ty = (dy / dd) * s; }
         }
         L.lean[0] += (tx - L.lean[0]) * 0.07; L.lean[1] += (ty - L.lean[1]) * 0.07;
+        if (Math.abs(tx - L.lean[0]) > 0.0015 || Math.abs(ty - L.lean[1]) > 0.0015) still = false;
       }
 
+      const ctxs = [back, front].map((cv) => {
+        const g = cv.getContext('2d');
+        g.setTransform(1, 0, 0, 1, 0, 0);
+        g.clearRect(0, 0, cv.width, cv.height);
+        g.setTransform(d * k, 0, 0, d * k, d * ox, d * oy);
+        return g;
+      });
+
+      // pass 1: work out every element's position once per frame (both layers reuse it)
+      const out = [0, 0];
+      for (const L of cells) {
+        const age = isStatic ? 1e6 : now - L.birth;
+        L._age = age;
+        if (age < 0) continue;
+        const jamp = boil && !isStatic ? Math.max(0.8, L.S * 0.01) : 0;
+        const t = isStatic ? 99 : age / 1000;
+        const wob = t > 0 && t < 2.5, dmp = Math.exp(-t * 3.2), dir = L.id % 2 ? 1 : -1;
+        const warp = (x, y) => {
+          if (wob) {
+            const hh = Math.max(0, (L.base - y) / L.S);
+            x += L.S * 0.07 * hh * dmp * Math.sin(t * 11) * dir;
+            y += L.S * 0.035 * hh * dmp * Math.sin(t * 11 + 1.2);
+          }
+          const hh = Math.min(2.5, Math.max(0, (L.base - y) / L.S)), f = hh * hh * 0.5 + hh * 0.5;
+          out[0] = x + L.lean[0] * L.S * 0.1 * f;
+          out[1] = y + L.lean[1] * L.S * 0.05 * f;
+          return out;
+        };
+        for (const e of L.els) {
+          if (e._jf !== frameN) { e._ju = jit(e.id, frameN, 1); e._jf = frameN; }
+          const j0 = jamp ? e._ju[0] * jamp : 0, j1 = jamp ? e._ju[1] * jamp : 0;
+          e._r3 = jamp ? e._ju[2] : 0;
+          if (e.t === 'stem') {
+            e._fr = eo((age - e.d0) / e.dur);
+            if (e._fr <= 0) continue;
+            const pts = e.pts, n = pts.length;
+            const buf = e._buf || (e._buf = pts.map(() => [0, 0]));
+            for (let i = 0; i < n; i++) {
+              const w = warp(L.cx + pts[i][0] * L.S + j0, L.base + pts[i][1] * L.S + j1);
+              buf[i][0] = w[0]; buf[i][1] = w[1];
+            }
+          } else if (e.t === 'leaf') {
+            e._sc = spr((age - e.d0) / 1000, 7, 15);
+            if (e._sc <= 0) continue;
+            const w = warp(L.cx + e.x * L.S + j0, L.base + e.y * L.S + j1);
+            e._x = w[0]; e._y = w[1];
+          } else {
+            e._a = age - e.d0;
+            if (e._a < 0) continue;
+            const w = warp(L.cx + e.x * L.S + j0, L.base + e.y * L.S + j1);
+            e._x = w[0]; e._y = w[1];
+          }
+        }
+      }
+
+      // pass 2: draw, behind-the-letters layer first, then the in-front layer
       for (let layer = 0; layer < 2; layer++) {
         const B = backend(ctxs[layer]);
         for (const L of cells) {
-          const age = isStatic ? 1e6 : now - L.birth;
-          if (age < 0) continue;
-          const jamp = boil && !isStatic ? Math.max(0.8, L.S * 0.01) : 0;
-          const warp = (x, y) => {
-            const t = isStatic ? 99 : (now - L.birth) / 1000;
-            if (t > 0 && t < 2.5) {
-              const hh = Math.max(0, (L.base - y) / L.S), dmp = Math.exp(-t * 3.2), dir = L.id % 2 ? 1 : -1;
-              x += L.S * 0.07 * hh * dmp * Math.sin(t * 11) * dir;
-              y += L.S * 0.035 * hh * dmp * Math.sin(t * 11 + 1.2);
-            }
-            const hh = Math.min(2.5, Math.max(0, (L.base - y) / L.S)), f = hh * hh * 0.5 + hh * 0.5;
-            x += L.lean[0] * L.S * 0.1 * f;
-            y += L.lean[1] * L.S * 0.05 * f;
-            return [x, y];
-          };
+          if (L._age < 0) continue;
           for (const e of L.els) {
-            const j = jit(e.id, frameN, jamp);
-            const wx = (x, y) => warp(L.cx + x * L.S + j[0], L.base + y * L.S + j[1]);
             if (e.t === 'stem') {
-              const fr = eo((age - e.d0) / e.dur);
-              if (fr <= 0) continue;
-              const Pp = e.pts.map((p) => wx(p[0], p[1]));
+              const fr = e._fr;
+              if (!(fr > 0)) continue;
+              const Pp = e._buf;
               for (const sg of e.segs) {
                 if (sg.layer !== layer) continue;
                 const b = Math.min(sg.u1, fr);
@@ -446,28 +498,28 @@ export function createGarden(opts = {}) {
               for (const th of e.thorns) if (fr > th.u && layerAt(e.segs, th.u) === layer) thorn(B, Pp, th.u, th.s, L.S);
             } else if (e.layer === layer) {
               if (e.t === 'leaf') {
-                const sc = spr((age - e.d0) / 1000, 7, 15);
-                if (sc <= 0) continue;
-                const p = wx(e.x, e.y);
-                leaf(B, p[0], p[1], e.a + j[2], e.L * L.S * sc, e.bend, cc.leaves[e.ci % cc.leaves.length]);
+                if (!(e._sc > 0)) continue;
+                leaf(B, e._x, e._y, e.a + e._r3, e.L * L.S * e._sc, e.bend, cc.leaves[e.ci % cc.leaves.length]);
               } else if (e.t === 'rose') {
-                const a = age - e.d0;
-                if (a < 0) continue;
-                const p = wx(e.x, e.y);
+                if (!(e._a >= 0)) continue;
                 // face-turn: rose petals shift toward the pointer
                 let wx2 = 0, wy2 = 0;
                 if (P) {
-                  const dx = P[0] - p[0], dy = P[1] - p[1], dd = Math.hypot(dx, dy), reach = 300;
+                  const dx = P[0] - e._x, dy = P[1] - e._y, dd = Math.hypot(dx, dy), reach = 300;
                   if (dd < reach && dd > 0.001) { const w = 1 - dd / reach, s = w * w * (3 - 2 * w) * Math.min(1, dd / 40); wx2 = (dx / dd) * s; wy2 = (dy / dd) * s; }
                 }
                 const c = fa[e.id] || (fa[e.id] = [0, 0]);
-                c[0] += (wx2 - c[0]) * 0.09; c[1] += (wy2 - c[1]) * 0.09;
-                rose(B, p[0], p[1], e.R * L.S, e.rot + j[2] + c[0] * 0.22, e, a, c);
+                if (layer === 0 || e.layer === 1) {
+                  c[0] += (wx2 - c[0]) * 0.09; c[1] += (wy2 - c[1]) * 0.09;
+                  if (Math.abs(wx2 - c[0]) > 0.002 || Math.abs(wy2 - c[1]) > 0.002) still = false;
+                }
+                rose(B, e._x, e._y, e.R * L.S, e.rot + e._r3 + c[0] * 0.22, e, e._a, c);
               }
             }
           }
         }
       }
+      moving = !still;
     },
   };
   return api;
