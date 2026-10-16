@@ -71,6 +71,11 @@ import Journey from "./components/Journey";
 import Toolbox from "./components/Toolbox";
 import Services from "./components/Toolbox";
 import NotFound from "./components/NotFound";
+import About from "./components/About";
+import Projects from "./components/Projetcs";
+import Principles from "./components/Principles";
+import Education from "./components/Education";
+import Contact from "./components/Contact";
 
 
 
@@ -675,55 +680,7 @@ function Portfolio({ theme, toggleTheme }) {
         </Section>
 
         {/* About */}
-        <Section
-          id="about"
-          title="About"
-          subtitle="A little about me and what I enjoy building."
-          index={1}
-        >
-          <div className="max-w-4xl space-y-5 text-lg leading-9 text-neutral-600 dark:text-neutral-400">
-            <p>
-              I'm a{" "}
-              <span className="relative inline-block font-medium text-neutral-900 dark:text-white">
-                Computer Science graduate
-                <span className="absolute left-0 bottom-1 -z-10 h-2 w-full rounded bg-yellow-200 dark:bg-yellow-500/40" />
-              </span>{" "}
-              passionate about building{" "}
-              <span className="relative inline-block font-medium text-neutral-900 dark:text-white">
-                modern, scalable web applications
-                <span className="absolute left-0 bottom-1 -z-10 h-2 w-full rounded bg-yellow-200 dark:bg-yellow-500/40" />
-              </span>
-              . I enjoy transforming ideas into intuitive digital experiences
-              through clean code, responsive interfaces, and thoughtful design.
-            </p>
-
-            <p>
-              I've built projects like{" "}
-              <span className="relative inline-block font-medium text-neutral-900 dark:text-white">
-                QueueLess
-                <span className="absolute left-0 bottom-1 -z-10 h-2 w-full rounded bg-yellow-200 dark:bg-yellow-500/40" />
-              </span>
-              ,{" "}
-              <span className="relative inline-block font-medium text-neutral-900 dark:text-white">
-                Reverto
-                <span className="absolute left-0 bottom-1 -z-10 h-2 w-full rounded bg-yellow-200 dark:bg-yellow-500/40" />
-              </span>
-              , and{" "}
-              <span className="relative inline-block font-medium text-neutral-900 dark:text-white">
-                ParkFlow
-                <span className="absolute left-0 bottom-1 -z-10 h-2 w-full rounded bg-yellow-200 dark:bg-yellow-500/40" />
-              </span>
-              , strengthening my skills in the MERN stack, REST APIs,
-              authentication, and backend architecture. I'm currently seeking
-              opportunities where I can{" "}
-              <span className="relative inline-block font-medium text-neutral-900 dark:text-white">
-                learn, collaborate, and contribute
-                <span className="absolute left-0 bottom-1 -z-10 h-2 w-full rounded bg-yellow-200 dark:bg-yellow-500/40" />
-              </span>{" "}
-              while growing as a full-stack developer.
-            </p>
-          </div>
-        </Section>
+   <About/>
 
         {/* Skills */}
     {/* Tech Stack */}
@@ -737,90 +694,7 @@ function Portfolio({ theme, toggleTheme }) {
 </Section>
 
         {/* Projects */}
-        <Section
-          id="projects"
-          title="Featured Projects"
-          subtitle="Real-world applications I've built."
-          index={3}
-        >
-          <div className="space-y-28">
-            {projects.map((project, i) => (
-              <motion.div
-                key={project.title}
-                custom={i}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true }}
-                variants={fadeUp}
-                className={`grid lg:grid-cols-2 gap-12 items-center ${
-                  i % 2 !== 0 ? "lg:[&>*:first-child]:order-2" : ""
-                }`}
-              >
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  transition={{ type: "spring", stiffness: 250 }}
-                  className="group relative overflow-hidden rounded-3xl border border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-800 aspect-video"
-                >
-                  <img
-                    src={project.image}
-                    alt={project.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-
-                  <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
-                    <span className="text-white font-medium">
-                      View Project →
-                    </span>
-                  </div>
-                </motion.div>
-
-                <div>
-                  <span className="text-sm uppercase tracking-[0.3em] text-neutral-400 dark:text-neutral-500">
-                    0{i + 1}
-                  </span>
-
-                  <h2
-                    className="mt-3 text-4xl font-bold text-neutral-900 dark:text-white"
-                    style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-                  >
-                    {project.title}
-                  </h2>
-
-                  <p className="mt-6 text-neutral-600 dark:text-neutral-400 leading-8">
-                    {project.description}
-                  </p>
-
-                  <div className="flex flex-wrap gap-2 mt-8">
-                    {project.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="rounded-full border border-neutral-200 dark:border-neutral-700 px-4 py-2 text-sm text-neutral-700 dark:text-neutral-300"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="flex gap-8 mt-10">
-                    <a
-                      href={project.link}
-                      className="font-medium text-neutral-900 dark:text-white hover:underline"
-                    >
-                      Live Demo →
-                    </a>
-
-                    <a
-                      href={project.github}
-                      className="font-medium text-neutral-900 dark:text-white hover:underline"
-                    >
-                      GitHub →
-                    </a>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </Section>
+   <Projects/>
 
         {/* GitHub activity */}
 {/* GitHub activity */}
@@ -842,240 +716,20 @@ function Portfolio({ theme, toggleTheme }) {
 </Section>
 
         {/* process */}
-        <Section
-          id="process"
-          title="Development Process"
-          subtitle="How I transform ideas into production-ready applications."
-          index={5}
-        >
-          <div className="relative mx-auto max-w-5xl">
-            <div className="absolute left-8 top-10 bottom-10 w-px bg-gradient-to-b from-neutral-300 via-neutral-200 to-transparent dark:from-neutral-700 dark:via-neutral-800" />
-
-            {developmentProcess.map((step, i) => (
-              <motion.div
-                key={step.title}
-                custom={i}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true }}
-                variants={fadeUp}
-                className="relative flex gap-8 pb-12 last:pb-0"
-              >
-                <motion.div
-                  whileHover={{ scale: 1.15, rotate: 8 }}
-                  className="relative z-10 flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-xl"
-                >
-                  <step.icon size={24} />
-                </motion.div>
-
-                <motion.div
-                  whileHover={{ y: -8, scale: 1.01 }}
-                  transition={{ type: "spring", stiffness: 250 }}
-                  className="relative flex-1 overflow-hidden rounded-3xl border border-neutral-200 dark:border-neutral-800 bg-white/70 dark:bg-neutral-900/70 backdrop-blur-xl p-8 shadow-sm transition-all"
-                >
-                  <span
-                    className="absolute right-6 top-2 text-7xl font-black text-neutral-100 dark:text-neutral-800 select-none"
-                    style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-                  >
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-
-                  <h3
-                    className="text-2xl font-semibold text-neutral-900 dark:text-white"
-                    style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-                  >
-                    {step.title}
-                  </h3>
-
-                  <p className="mt-4 max-w-2xl leading-8 text-neutral-500 dark:text-neutral-400">
-                    {step.description}
-                  </p>
-
-                  <div className="mt-6 h-1 w-24 rounded-full bg-neutral-200 dark:bg-neutral-800 overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      whileInView={{ width: "100%" }}
-                      viewport={{ once: true }}
-                      transition={{ delay: 0.2, duration: 0.8 }}
-                      className="h-full bg-neutral-900 dark:bg-white"
-                    />
-                  </div>
-                </motion.div>
-              </motion.div>
-            ))}
-          </div>
-        </Section>
+     <Principles/>
 
 <Section id="toolbox" title="Toolbox" subtitle="..." index={6}>
   <Toolbox toolbox={toolbox} />
 </Section>
 
         {/* education */}
-        <Section
-          id="education"
-          title="Education"
-          subtitle="My academic journey."
-          index={7}
-        >
-          <div className="relative border-l-2 border-neutral-200 dark:border-neutral-800 ml-4 space-y-10">
-            {education.map((e, i) => (
-              <motion.div
-                key={e.title}
-                custom={i}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true }}
-                variants={fadeUp}
-                className="relative pl-8"
-              >
-                <div
-                  className="absolute -left-[11px] top-2 h-5 w-5 rounded-full border-4 border-white dark:border-neutral-950 shadow"
-                  style={{ backgroundColor: e.color }}
-                />
-
-                <div className="rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-5 shadow-sm hover:shadow-md transition">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3
-                        className="text-lg font-semibold text-neutral-900 dark:text-white"
-                        style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-                      >
-                        {e.title}
-                      </h3>
-
-                      <p className="text-neutral-600 dark:text-neutral-400 mt-1">
-                        {e.subtitle}
-                      </p>
-                    </div>
-
-                    <span className="rounded-full bg-neutral-100 dark:bg-neutral-800 px-3 py-1 text-xs font-medium text-neutral-500 dark:text-neutral-400">
-                      {e.period}
-                    </span>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </Section>
+   <Education/>
 
         {/* achievements */}
-        <Section
-          id="achievements"
-          title="Highlights"
-          subtitle="Highlights from my journey as a developer."
-          index={8}
-        >
-          <div className="space-y-5">
-            {achievements.map((a, i) => (
-              <motion.div
-                key={a.title}
-                custom={i}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true }}
-                variants={fadeUp}
-                whileHover={{ x: 6 }}
-                className="group flex items-start gap-5 border-l-2 border-neutral-200 dark:border-neutral-800 pl-6 py-2"
-              >
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 transition-all duration-300 group-hover:scale-110">
-                  <a.icon size={20} />
-                </div>
-
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <h3
-                      className="text-lg font-semibold text-neutral-900 dark:text-white"
-                      style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-                    >
-                      {a.title}
-                    </h3>
-
-                    <span className="text-sm text-neutral-400 dark:text-neutral-500">
-                      0{i + 1}
-                    </span>
-                  </div>
-
-                  <p className="mt-2 text-neutral-500 dark:text-neutral-400 leading-relaxed">
-                    {a.description}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </Section>
+     
 
         {/* contact */}
-        <motion.section
-          id="contact"
-          className="mt-14"
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, margin: "-80px" }}
-          variants={fadeUp}
-        >
-          <div className="relative overflow-hidden rounded-3xl bg-neutral-900 px-8 py-12 text-center">
-            <div
-              className="absolute inset-0 opacity-[0.07]"
-              style={{
-                backgroundImage:
-                  "radial-gradient(circle, #fff 1px, transparent 1px)",
-                backgroundSize: "16px 16px",
-              }}
-            />
-            <div className="relative">
-              <h2
-                className="text-2xl sm:text-3xl font-semibold text-white tracking-tight"
-                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-              >
-                Let's build something together
-              </h2>
-              <p className="text-neutral-400 mt-3 max-w-sm mx-auto">
-                I'm actively looking for my first developer role. Reach out for
-                opportunities, collaborations, or just to say hi.
-              </p>
-
-              <motion.a
-                href="mailto:you@example.com"
-                whileHover={{ y: -2, scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                className="inline-flex items-center gap-2 mt-7 rounded-full bg-white text-neutral-900 text-sm font-semibold px-6 py-3"
-              >
-                Say hello <FaArrowRight size={13} />
-              </motion.a>
-
-              <div className="flex items-center justify-center gap-5 mt-8">
-                <a
-                  href="https://github.com/Shivam10yadav/"
-                  aria-label="GitHub"
-                  className="text-neutral-400 hover:text-white transition-colors"
-                >
-                  <FaGithub size={20} />
-                </a>
-                <a
-                  href="https://www.linkedin.com/in/shivam10yadav/"
-                  aria-label="LinkedIn"
-                  className="text-neutral-400 hover:text-white transition-colors"
-                >
-                  <FaLinkedin size={20} />
-                </a>
-                <a
-                  href="https://x.com/Y80Shivam"
-                  aria-label="X"
-                  className="text-neutral-400 hover:text-white transition-colors"
-                >
-                  <FaTwitter size={20} />
-                </a>
-                <a
-                  href="/resume.pdf"
-                  aria-label="Resume"
-                  className="text-neutral-400 hover:text-white transition-colors"
-                >
-                  <FaBook size={20} />
-                </a>
-              </div>
-            </div>
-          </div>
-        </motion.section>
+      <Contact/>
       </div>
       <Footer />
          <Dock theme={theme} toggleTheme={toggleTheme} />
@@ -1091,8 +745,20 @@ function Portfolio({ theme, toggleTheme }) {
 // import Portfolio from "./Portfolio";  // however you already import it
 
 export default function App() {
-  const [theme, setTheme] = useState("light");
+  const [showIntro, setShowIntro] = useState(true);
 
+  const media = window.matchMedia("(prefers-color-scheme: dark)");
+  const [theme, setTheme] = useState(media.matches ? "dark" : "light");
+
+  // follow the system theme, including when it changes while the site is open
+  React.useEffect(() => {
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const onChange = (e) => setTheme(e.matches ? "dark" : "light");
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  // keep your existing effects below this unchanged
   React.useEffect(() => {
     const link = document.createElement("link");
     link.rel = "stylesheet";
@@ -1108,12 +774,5 @@ export default function App() {
 
   const toggleTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
 
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Portfolio theme={theme} toggleTheme={toggleTheme} />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </BrowserRouter>
-  );
+  return <Portfolio theme={theme} toggleTheme={toggleTheme} />;
 }
