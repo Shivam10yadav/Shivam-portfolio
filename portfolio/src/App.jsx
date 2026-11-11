@@ -76,6 +76,7 @@ import Projects from "./components/Projetcs";
 import Principles from "./components/Principles";
 import Education from "./components/Education";
 import Contact from "./components/Contact";
+import Experience from "./components/Experience";
 
 
 
@@ -708,6 +709,7 @@ function Portfolio({ theme, toggleTheme }) {
   </div>
 </Section>
 
+<Experience/>
 
 
         {/* journey */}
