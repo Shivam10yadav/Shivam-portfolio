@@ -1,7 +1,33 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import { FaJava, FaWindows, FaDatabase } from "react-icons/fa";
+import {
+  SiLinux,
+  SiNginx,
+  SiPhp,
+  SiMongodb,
+  SiPostman,
+  SiGit,
+  SiUipath,
+} from "react-icons/si";
+import { Activity, Search, Bot, ClipboardCheck } from "lucide-react";
 
 const START = new Date(2026, 7, 1); // Aug 2026
+const ACCENT = "#F15A24";
+const ease = [0.22, 1, 0.36, 1];
+
+const TECH = {
+  SQL: { Icon: FaDatabase, color: "#336791" },
+  Linux: { Icon: SiLinux, color: "#FCC624" },
+  Java: { Icon: FaJava, color: "#ED8B00" },
+  PHP: { Icon: SiPhp, color: "#777BB4" },
+  MongoDB: { Icon: SiMongodb, color: "#47A248" },
+  IIS: { Icon: FaWindows, color: "#0078D4" },
+  Nginx: { Icon: SiNginx, color: "#009639" },
+  UiPath: { Icon: SiUipath, color: "#FA4616" },
+  Postman: { Icon: SiPostman, color: "#FF6C37" },
+  Git: { Icon: SiGit, color: "#F05032" },
+};
 
 const experience = {
   start: "Aug 2026",
@@ -9,246 +35,216 @@ const experience = {
   role: "Application Support Engineer",
   company: "Xtreme Softech",
   location: "Gurugram, India",
-
-  summary: [
-    "I keep business-critical applications running smoothly. My day-to-day is watching production and servers, catching problems early, and tracing them to the root cause through Java and PHP logs, database queries and API responses, so issues are fixed once instead of repeatedly.",
-    "I also act as the bridge between users and developers: reproducing bugs, testing fixes before release, running UiPath automations, and writing clear documentation so the next incident is faster to resolve.",
-  ],
-
+  summary:
+    "I keep business-critical applications running smoothly: watching production and servers, tracing problems to the root cause through Java and PHP logs, database queries and API responses, and bridging users and developers with clear bug reports, tested fixes and documentation.",
   areas: [
     {
       title: "Monitoring & Reliability",
-      text: "Staying ahead of outages instead of reacting to them.",
-      items: [
-        "Production & server monitoring",
-        "SSL and infrastructure monitoring",
-        "IIS and Nginx health checks",
-      ],
+      Icon: Activity,
+      text: "Production, server, SSL, IIS and Nginx health checks.",
+      tools: ["Linux", "IIS", "Nginx"],
     },
     {
       title: "Troubleshooting & Analysis",
-      text: "Finding the real cause, not just the symptom.",
-      items: [
-        "Java / PHP log analysis",
-        "Application troubleshooting",
-        "API, database & integration checks",
-      ],
+      Icon: Search,
+      text: "Java and PHP log analysis, API, database and integration checks.",
+      tools: ["Java", "PHP", "SQL", "MongoDB", "Postman"],
     },
     {
       title: "Automation",
-      text: "Removing repetitive manual work from operations.",
-      items: ["UiPath bot execution & monitoring", "Failure review & re-runs"],
+      Icon: Bot,
+      text: "UiPath bot execution, monitoring, failure review and re-runs.",
+      tools: ["UiPath", "Linux"],
     },
     {
       title: "Quality & Documentation",
-      text: "Making sure fixes hold and knowledge is shared.",
-      items: [
-        "Functional testing & bug reporting",
-        "Technical documentation & reporting",
-      ],
+      Icon: ClipboardCheck,
+      text: "Functional testing, bug reporting and technical documentation.",
+      tools: ["Git", "Postman"],
     },
   ],
-
-  tools: [
-    "SQL",
-    "Linux",
-    "Java",
-    "PHP",
-    "MongoDB",
-    "IIS",
-    "Nginx",
-    "UiPath",
-    "Postman",
-    "Git",
-  ],
+  tools: Object.keys(TECH),
 };
-
-const ease = [0.22, 1, 0.36, 1];
 
 function getDuration() {
   const now = new Date();
-  let months =
+  const months =
     (now.getFullYear() - START.getFullYear()) * 12 +
     (now.getMonth() - START.getMonth());
   if (months < 1) return "Just started";
   const y = Math.floor(months / 12);
   const m = months % 12;
-  const parts = [];
-  if (y) parts.push(`${y} yr${y > 1 ? "s" : ""}`);
-  if (m) parts.push(`${m} mo${m > 1 ? "s" : ""}`);
-  return parts.join(" ");
+  return [y && `${y} yr${y > 1 ? "s" : ""}`, m && `${m} mo${m > 1 ? "s" : ""}`]
+    .filter(Boolean)
+    .join(" ");
+}
+
+function TechIcon({ name, size = 16, colored = false, className = "" }) {
+  const entry = TECH[name];
+  if (!entry) return null;
+  const { Icon, color } = entry;
+  return (
+    <Icon
+      size={size}
+      aria-hidden="true"
+      className={className}
+      style={colored ? { color } : undefined}
+    />
+  );
 }
 
 export default function Experience() {
   const reduce = useReducedMotion();
+  const [hovered, setHovered] = useState(null);
+
+  const activeTools = useMemo(
+    () => (hovered !== null ? experience.areas[hovered].tools : null),
+    [hovered]
+  );
 
   const reveal = (delay = 0) =>
     reduce
       ? {}
       : {
-          initial: { opacity: 0, y: 24 },
+          initial: { opacity: 0, y: 16 },
           whileInView: { opacity: 1, y: 0 },
-          viewport: { once: true, amount: 0.2 },
-          transition: { duration: 0.7, delay, ease },
+          viewport: { once: true, amount: 0.15 },
+          transition: { duration: 0.6, delay, ease },
         };
 
   return (
-    <section id="experience" className="mt-20 sm:mt-28">
-      {/* Heading */}
-      <motion.div {...reveal()} className="mb-10 sm:mb-14">
-        <div className="flex items-end justify-between gap-4">
-          <h2
-            className="text-3xl font-bold tracking-tight text-neutral-900 dark:text-white sm:text-5xl"
-            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-          >
-            Experience<span className="text-[#F15A24]">.</span>
-          </h2>
-          <span className="hidden pb-1 font-mono text-xs uppercase tracking-widest text-neutral-500 sm:block">
-            {experience.start} &ndash; {experience.end}
+    <section id="experience" className="w-full py-16 sm:py-24">
+      {/* Eyebrow */}
+      <motion.div {...reveal()}>
+        <div className="flex items-center justify-between gap-4 font-mono text-xs text-neutral-500">
+          <span>Experience</span>
+          <span>
+            {experience.start} &mdash; {experience.end} ({getDuration()})
           </span>
         </div>
-
-        {/* Animated rule */}
-        <motion.div
-          initial={reduce ? false : { scaleX: 0 }}
-          whileInView={{ scaleX: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1, ease }}
-          style={{ transformOrigin: "left" }}
-          className="mt-5 h-px w-full bg-gradient-to-r from-[#F15A24] via-neutral-300 to-transparent dark:via-neutral-800"
-        />
+        <div className="mt-4 h-px w-full bg-neutral-200 dark:bg-neutral-800" />
       </motion.div>
 
-      <article className="grid gap-10 lg:grid-cols-12 lg:gap-14">
-        {/* Left: role meta (sticky on desktop) */}
-        <motion.aside
-          {...reveal(0.05)}
-          className="lg:col-span-4"
+      {/* Masthead */}
+      <motion.div {...reveal(0.05)} className="mt-8 sm:mt-10">
+        <h2
+          className="text-4xl font-bold leading-[1.06] tracking-tight text-neutral-900 dark:text-white sm:text-6xl"
+          style={{ fontFamily: "'Space Grotesk', sans-serif" }}
         >
-          <div className="lg:sticky lg:top-24">
-            <p className="font-mono text-xs font-semibold uppercase tracking-widest text-[#E34C19] dark:text-[#FF875B]">
-              {experience.start} &ndash; {experience.end}
-            </p>
-            <p className="mt-1 font-mono text-xs text-neutral-500">
-              {getDuration()}
-            </p>
+          {experience.role}
+          <span style={{ color: ACCENT }}>.</span>
+        </h2>
 
-            <h3
-              className="mt-5 text-2xl font-bold leading-tight tracking-tight text-neutral-900 dark:text-white sm:text-3xl"
-              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-            >
-              {experience.role}
-            </h3>
-
-            <p className="mt-2 text-sm font-medium text-neutral-800 dark:text-neutral-200">
-              {experience.company}
-            </p>
-            <p className="text-sm text-neutral-500">{experience.location}</p>
-          </div>
-        </motion.aside>
-
-        {/* Right: content */}
-        <div className="lg:col-span-8">
-          {/* Summary */}
-          <motion.div {...reveal(0.1)} className="space-y-4">
-            {experience.summary.map((p, i) => (
-              <p
-                key={i}
-                className={
-                  i === 0
-                    ? "text-base leading-8 text-neutral-800 dark:text-neutral-200 sm:text-lg"
-                    : "text-sm leading-7 text-neutral-600 dark:text-neutral-400 sm:text-[15px]"
-                }
-              >
-                {p}
-              </p>
-            ))}
-          </motion.div>
-
-          {/* Focus areas */}
-          <div className="mt-12">
-            <h4 className="mb-2 font-mono text-xs uppercase tracking-widest text-neutral-500">
-              What I work on
-            </h4>
-
-            <div className="divide-y divide-neutral-200 border-y border-neutral-200 dark:divide-neutral-800 dark:border-neutral-800">
-              {experience.areas.map((area, index) => (
-                <motion.div
-                  key={area.title}
-                  {...(reduce
-                    ? {}
-                    : {
-                        initial: { opacity: 0, y: 16 },
-                        whileInView: { opacity: 1, y: 0 },
-                        viewport: { once: true, amount: 0.3 },
-                        transition: { duration: 0.55, delay: index * 0.06, ease },
-                      })}
-                  className="group relative grid gap-3 py-6 transition-colors duration-300 sm:grid-cols-[3rem_1fr] sm:gap-6"
-                >
-                  {/* hover wash */}
-                  <span className="pointer-events-none absolute inset-0 -mx-3 rounded-lg bg-[#F15A24]/[0.04] opacity-0 transition-opacity duration-300 group-hover:opacity-100 sm:-mx-4" />
-
-                  <span className="relative font-mono text-sm text-neutral-400 transition-colors duration-300 group-hover:text-[#F15A24]">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-
-                  <div className="relative">
-                    <h5 className="text-base font-semibold text-neutral-900 dark:text-white">
-                      {area.title}
-                    </h5>
-                    <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-                      {area.text}
-                    </p>
-
-                    <ul className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
-                      {area.items.map((item) => (
-                        <li
-                          key={item}
-                          className="text-sm text-neutral-700 transition-transform duration-300 group-hover:translate-x-0.5 dark:text-neutral-300"
-                        >
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-
-          {/* Tools */}
-          <div className="mt-12">
-            <h4 className="mb-4 font-mono text-xs uppercase tracking-widest text-neutral-500">
-              Tools &amp; Technologies
-            </h4>
-
-            <motion.ul
-              initial={reduce ? false : "hidden"}
-              whileInView="show"
-              viewport={{ once: true, amount: 0.4 }}
-              variants={{
-                hidden: {},
-                show: { transition: { staggerChildren: 0.04 } },
-              }}
-              className="flex flex-wrap gap-2"
-            >
-              {experience.tools.map((tool) => (
-                <motion.li
-                  key={tool}
-                  variants={{
-                    hidden: { opacity: 0, y: 10 },
-                    show: { opacity: 1, y: 0, transition: { duration: 0.4, ease } },
-                  }}
-                  whileHover={reduce ? undefined : { y: -2 }}
-                  className="cursor-default rounded-md border border-neutral-200 px-3 py-1.5 text-xs font-medium text-neutral-600 transition-colors duration-200 hover:border-[#F15A24] hover:text-[#E34C19] dark:border-neutral-800 dark:text-neutral-400 dark:hover:text-[#FF875B]"
-                >
-                  {tool}
-                </motion.li>
-              ))}
-            </motion.ul>
-          </div>
+        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-base sm:text-lg">
+          <span className="font-semibold text-neutral-900 dark:text-neutral-100">
+            {experience.company}
+          </span>
+          <span className="text-neutral-300 dark:text-neutral-700">/</span>
+          <span className="text-neutral-500">{experience.location}</span>
+          <span className="inline-flex items-center gap-2 rounded-full border border-neutral-200 px-3 py-1 text-xs text-neutral-600 dark:border-neutral-800 dark:text-neutral-400">
+            <span className="relative flex h-2 w-2">
+              {!reduce && (
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+              )}
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+            </span>
+            On the support desk
+          </span>
         </div>
-      </article>
+      </motion.div>
+
+      {/* Summary */}
+      <motion.p
+        {...reveal(0.1)}
+        className="mt-8 max-w-3xl text-base leading-8 text-neutral-700 dark:text-neutral-300 sm:text-lg"
+      >
+        {experience.summary}
+      </motion.p>
+
+      {/* Core focus */}
+      <div
+        onMouseLeave={() => setHovered(null)}
+        className="mt-12 divide-y divide-neutral-200 border-y border-neutral-200 dark:divide-neutral-800 dark:border-neutral-800"
+      >
+        {experience.areas.map((area, i) => {
+          const isActive = hovered === i;
+          const isDimmed = hovered !== null && !isActive;
+          const AreaIcon = area.Icon;
+
+          return (
+            <div
+              key={area.title}
+              tabIndex={0}
+              onMouseEnter={() => setHovered(i)}
+              onFocus={() => setHovered(i)}
+              onBlur={() => setHovered(null)}
+              className={`grid items-center gap-3 py-5 outline-none transition-opacity duration-300 lg:grid-cols-12 lg:gap-6 ${
+                isDimmed ? "opacity-40" : "opacity-100"
+              }`}
+            >
+              <span
+                className={`flex h-9 w-9 items-center justify-center rounded-md border transition-colors lg:col-span-1 ${
+                  isActive
+                    ? "border-[#F15A24] text-[#F15A24]"
+                    : "border-neutral-200 text-neutral-400 dark:border-neutral-800"
+                }`}
+              >
+                <AreaIcon size={17} aria-hidden="true" />
+              </span>
+
+              <h3
+                className="text-lg font-semibold tracking-tight text-neutral-900 dark:text-white sm:text-xl lg:col-span-4"
+                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+              >
+                {area.title}
+              </h3>
+
+              <p className="text-sm text-neutral-500 dark:text-neutral-400 lg:col-span-5">
+                {area.text}
+              </p>
+
+              <div className="flex flex-wrap gap-3 lg:col-span-2 lg:justify-end">
+                {area.tools.map((t) => (
+                  <span key={t} title={t} className="text-neutral-400">
+                    <TechIcon name={t} size={18} colored={isActive} />
+                    <span className="sr-only">{t}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Stack */}
+      <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+        <span className="font-mono text-xs text-neutral-500">Stack</span>
+        {experience.tools.map((tool) => {
+          const isHighlighted = activeTools?.includes(tool);
+          const isMuted = activeTools && !isHighlighted;
+          return (
+            <span
+              key={tool}
+              style={{ "--c": TECH[tool].color }}
+              className={`group flex cursor-default items-center gap-2 font-mono text-sm transition-opacity duration-200 ${
+                isMuted ? "opacity-30" : "opacity-100"
+              } ${
+                isHighlighted
+                  ? "font-semibold text-neutral-900 dark:text-white"
+                  : "text-neutral-600 dark:text-neutral-400"
+              }`}
+            >
+              <TechIcon
+                name={tool}
+                size={16}
+                colored={isHighlighted}
+                className="transition-colors group-hover:text-[color:var(--c)]"
+              />
+              {tool}
+            </span>
+          );
+        })}
+      </div>
     </section>
   );
 }

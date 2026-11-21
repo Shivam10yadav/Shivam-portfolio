@@ -67,13 +67,12 @@ import WavingPortfolioLanding from "./components/WavingPortfolioLanding";
 import GithubActivity from "./components/GithubActivity";
 import Dock from "./components/Dock";
 import TechStack from "./components/TechStack";
-import Journey from "./components/Journey";
 import Toolbox from "./components/Toolbox";
+import Journey from "./components/Journey";
 import Services from "./components/Toolbox";
 import NotFound from "./components/NotFound";
 import About from "./components/About";
 import Projects from "./components/Projetcs";
-import Principles from "./components/Principles";
 import Education from "./components/Education";
 import Contact from "./components/Contact";
 import Experience from "./components/Experience";
@@ -716,9 +715,7 @@ function Portfolio({ theme, toggleTheme }) {
       <Section id="journey" title="My Journey" subtitle="Every year brought new challenges, skills, and milestones." index={4}>
   <Journey journey={journey} />
 </Section>
-
-        {/* process */}
-     <Principles/>
+        
 
 <Section id="toolbox" title="Toolbox" subtitle="..." index={6}>
   <Toolbox toolbox={toolbox} />
