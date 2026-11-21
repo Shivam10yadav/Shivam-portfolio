@@ -1,25 +1,52 @@
-
 import React from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
+
+const START = new Date(2026, 7, 1); // Aug 2026
 
 const experience = {
-  period: "2025 — Present",
-  role: "Application Support ",
+  start: "Aug 2026",
+  end: "Present",
+  role: "Application Support Engineer",
   company: "Xtreme Softech",
-  location: "Gurugram",
+  location: "Gurugram, India",
 
-  description:
-    "Keeping applications reliable through production monitoring, troubleshooting, automation and software testing.",
+  summary: [
+    "I keep business-critical applications running smoothly. My day-to-day is watching production and servers, catching problems early, and tracing them to the root cause through Java and PHP logs, database queries and API responses, so issues are fixed once instead of repeatedly.",
+    "I also act as the bridge between users and developers: reproducing bugs, testing fixes before release, running UiPath automations, and writing clear documentation so the next incident is faster to resolve.",
+  ],
 
-  work: [
-    "Production & server monitoring",
-    "Java / PHP log analysis",
-    "Application troubleshooting",
-    "UiPath bot execution & monitoring",
-    "Functional testing & bug reporting",
-    "API, database & integration checks",
-    "SSL and infrastructure monitoring",
-    "Technical documentation & reporting",
+  areas: [
+    {
+      title: "Monitoring & Reliability",
+      text: "Staying ahead of outages instead of reacting to them.",
+      items: [
+        "Production & server monitoring",
+        "SSL and infrastructure monitoring",
+        "IIS and Nginx health checks",
+      ],
+    },
+    {
+      title: "Troubleshooting & Analysis",
+      text: "Finding the real cause, not just the symptom.",
+      items: [
+        "Java / PHP log analysis",
+        "Application troubleshooting",
+        "API, database & integration checks",
+      ],
+    },
+    {
+      title: "Automation",
+      text: "Removing repetitive manual work from operations.",
+      items: ["UiPath bot execution & monitoring", "Failure review & re-runs"],
+    },
+    {
+      title: "Quality & Documentation",
+      text: "Making sure fixes hold and knowledge is shared.",
+      items: [
+        "Functional testing & bug reporting",
+        "Technical documentation & reporting",
+      ],
+    },
   ],
 
   tools: [
@@ -38,142 +65,190 @@ const experience = {
 
 const ease = [0.22, 1, 0.36, 1];
 
-export default function Experience() {
-  return (
-    <section id="experience" className="mt-20 sm:mt-24">
+function getDuration() {
+  const now = new Date();
+  let months =
+    (now.getFullYear() - START.getFullYear()) * 12 +
+    (now.getMonth() - START.getMonth());
+  if (months < 1) return "Just started";
+  const y = Math.floor(months / 12);
+  const m = months % 12;
+  const parts = [];
+  if (y) parts.push(`${y} yr${y > 1 ? "s" : ""}`);
+  if (m) parts.push(`${m} mo${m > 1 ? "s" : ""}`);
+  return parts.join(" ");
+}
 
+export default function Experience() {
+  const reduce = useReducedMotion();
+
+  const reveal = (delay = 0) =>
+    reduce
+      ? {}
+      : {
+          initial: { opacity: 0, y: 24 },
+          whileInView: { opacity: 1, y: 0 },
+          viewport: { once: true, amount: 0.2 },
+          transition: { duration: 0.7, delay, ease },
+        };
+
+  return (
+    <section id="experience" className="mt-20 sm:mt-28">
       {/* Heading */}
-      <div className="mb-8 flex items-end justify-between">
-        <div>
+      <motion.div {...reveal()} className="mb-10 sm:mb-14">
+        <div className="flex items-end justify-between gap-4">
           <h2
-            className="text-3xl font-bold tracking-tight text-neutral-900 dark:text-white sm:text-4xl"
+            className="text-3xl font-bold tracking-tight text-neutral-900 dark:text-white sm:text-5xl"
             style={{ fontFamily: "'Space Grotesk', sans-serif" }}
           >
             Experience<span className="text-[#F15A24]">.</span>
           </h2>
-          <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
-            A little about what I do.
-          </p>
+          <span className="hidden pb-1 font-mono text-xs uppercase tracking-widest text-neutral-500 sm:block">
+            {experience.start} &ndash; {experience.end}
+          </span>
         </div>
 
-        <span className="hidden font-mono text-xs text-neutral-500 sm:block">
-          01 — PRESENT
-        </span>
-      </div>
+        {/* Animated rule */}
+        <motion.div
+          initial={reduce ? false : { scaleX: 0 }}
+          whileInView={{ scaleX: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1, ease }}
+          style={{ transformOrigin: "left" }}
+          className="mt-5 h-px w-full bg-gradient-to-r from-[#F15A24] via-neutral-300 to-transparent dark:via-neutral-800"
+        />
+      </motion.div>
 
-      {/* Experience Card */}
-      <motion.article
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.15 }}
-        transition={{ duration: 0.65, ease }}
-        className="group relative overflow-hidden rounded-xl border border-neutral-200 bg-white transition-all duration-300 hover:border-[#F15A24]/50 dark:border-neutral-800 dark:bg-neutral-950"
-      >
+      <article className="grid gap-10 lg:grid-cols-12 lg:gap-14">
+        {/* Left: role meta (sticky on desktop) */}
+        <motion.aside
+          {...reveal(0.05)}
+          className="lg:col-span-4"
+        >
+          <div className="lg:sticky lg:top-24">
+            <p className="font-mono text-xs font-semibold uppercase tracking-widest text-[#E34C19] dark:text-[#FF875B]">
+              {experience.start} &ndash; {experience.end}
+            </p>
+            <p className="mt-1 font-mono text-xs text-neutral-500">
+              {getDuration()}
+            </p>
 
-        {/* Decorative accent */}
-        <div className="absolute right-0 top-0 h-1 w-24 rounded-bl-full bg-[#F15A24] transition-all duration-500 group-hover:w-40" />
+            <h3
+              className="mt-5 text-2xl font-bold leading-tight tracking-tight text-neutral-900 dark:text-white sm:text-3xl"
+              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+            >
+              {experience.role}
+            </h3>
 
-        <div className="p-5 sm:p-8 lg:p-10">
-
-          {/* Role details */}
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-
-            <div className="min-w-0">
-              <div className="mb-4 flex flex-wrap items-center gap-3">
-                <span className="rounded-full bg-[#F15A24]/10 px-3 py-1 font-mono text-[11px] font-semibold text-[#E34C19] dark:text-[#FF875B]">
-                  {experience.period}
-                </span>
-
-                <span className="flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                  Currently working
-                </span>
-              </div>
-
-              <h3
-                className="text-2xl font-bold tracking-tight text-neutral-900 dark:text-white sm:text-4xl"
-                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-              >
-                {experience.role}
-              </h3>
-
-              <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
-                {experience.company}
-                <span className="mx-2 text-[#F15A24]">✳</span>
-                {experience.location}
-              </p>
-            </div>
-
-            {/* Decorative graphic */}
-            <div className="hidden h-20 w-20 shrink-0 items-center justify-center rounded-2xl border border-neutral-200 bg-neutral-50 text-4xl text-[#F15A24] transition-transform duration-500 group-hover:rotate-6 dark:border-neutral-800 dark:bg-neutral-900 sm:flex">
-              <span>⌘</span>
-            </div>
-
+            <p className="mt-2 text-sm font-medium text-neutral-800 dark:text-neutral-200">
+              {experience.company}
+            </p>
+            <p className="text-sm text-neutral-500">{experience.location}</p>
           </div>
+        </motion.aside>
 
-          <p className="mt-7 max-w-2xl text-sm leading-7 text-neutral-600 dark:text-neutral-400 sm:text-[15px]">
-            {experience.description}
-          </p>
+        {/* Right: content */}
+        <div className="lg:col-span-8">
+          {/* Summary */}
+          <motion.div {...reveal(0.1)} className="space-y-4">
+            {experience.summary.map((p, i) => (
+              <p
+                key={i}
+                className={
+                  i === 0
+                    ? "text-base leading-8 text-neutral-800 dark:text-neutral-200 sm:text-lg"
+                    : "text-sm leading-7 text-neutral-600 dark:text-neutral-400 sm:text-[15px]"
+                }
+              >
+                {p}
+              </p>
+            ))}
+          </motion.div>
 
-          {/* Work areas */}
-          <div className="mt-9">
-            <h4 className="mb-5 text-sm font-semibold text-neutral-900 dark:text-white">
+          {/* Focus areas */}
+          <div className="mt-12">
+            <h4 className="mb-2 font-mono text-xs uppercase tracking-widest text-neutral-500">
               What I work on
             </h4>
 
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-
-              {experience.work.map((item, index) => (
+            <div className="divide-y divide-neutral-200 border-y border-neutral-200 dark:divide-neutral-800 dark:border-neutral-800">
+              {experience.areas.map((area, index) => (
                 <motion.div
-                  key={item}
-                  initial={{ opacity: 0, x: -8 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{
-                    duration: 0.4,
-                    delay: index * 0.045,
-                    ease,
-                  }}
-                  className="flex items-center gap-3 rounded-lg border border-neutral-100 px-3 py-3 transition-all duration-200 hover:border-[#F15A24]/40 hover:bg-[#F15A24]/[0.04] dark:border-neutral-800 dark:hover:bg-[#F15A24]/[0.05]"
+                  key={area.title}
+                  {...(reduce
+                    ? {}
+                    : {
+                        initial: { opacity: 0, y: 16 },
+                        whileInView: { opacity: 1, y: 0 },
+                        viewport: { once: true, amount: 0.3 },
+                        transition: { duration: 0.55, delay: index * 0.06, ease },
+                      })}
+                  className="group relative grid gap-3 py-6 transition-colors duration-300 sm:grid-cols-[3rem_1fr] sm:gap-6"
                 >
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-[#F15A24]/10 text-xs font-bold text-[#E34C19] dark:text-[#FF875B]">
-                    ↗
+                  {/* hover wash */}
+                  <span className="pointer-events-none absolute inset-0 -mx-3 rounded-lg bg-[#F15A24]/[0.04] opacity-0 transition-opacity duration-300 group-hover:opacity-100 sm:-mx-4" />
+
+                  <span className="relative font-mono text-sm text-neutral-400 transition-colors duration-300 group-hover:text-[#F15A24]">
+                    {String(index + 1).padStart(2, "0")}
                   </span>
 
-                  <span className="text-sm text-neutral-700 dark:text-neutral-300">
-                    {item}
-                  </span>
+                  <div className="relative">
+                    <h5 className="text-base font-semibold text-neutral-900 dark:text-white">
+                      {area.title}
+                    </h5>
+                    <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+                      {area.text}
+                    </p>
+
+                    <ul className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
+                      {area.items.map((item) => (
+                        <li
+                          key={item}
+                          className="text-sm text-neutral-700 transition-transform duration-300 group-hover:translate-x-0.5 dark:text-neutral-300"
+                        >
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </motion.div>
               ))}
-
             </div>
           </div>
 
           {/* Tools */}
-          <div className="mt-9 border-t border-neutral-200 pt-6 dark:border-neutral-800">
-            <div className="mb-4 flex items-center justify-between">
-              <h4 className="text-sm font-semibold text-neutral-900 dark:text-white">
-                Tools & Technologies
-              </h4>
-              <span className="text-xs text-neutral-400">
-                Technical stack
-              </span>
-            </div>
+          <div className="mt-12">
+            <h4 className="mb-4 font-mono text-xs uppercase tracking-widest text-neutral-500">
+              Tools &amp; Technologies
+            </h4>
 
-            <div className="flex flex-wrap gap-2">
+            <motion.ul
+              initial={reduce ? false : "hidden"}
+              whileInView="show"
+              viewport={{ once: true, amount: 0.4 }}
+              variants={{
+                hidden: {},
+                show: { transition: { staggerChildren: 0.04 } },
+              }}
+              className="flex flex-wrap gap-2"
+            >
               {experience.tools.map((tool) => (
-                <span
+                <motion.li
                   key={tool}
-                  className="rounded-md border border-neutral-200 px-3 py-1.5 text-xs font-medium text-neutral-600 transition-all duration-200 hover:border-[#F15A24] hover:text-[#E34C19] dark:border-neutral-800 dark:text-neutral-400 dark:hover:text-[#FF875B]"
+                  variants={{
+                    hidden: { opacity: 0, y: 10 },
+                    show: { opacity: 1, y: 0, transition: { duration: 0.4, ease } },
+                  }}
+                  whileHover={reduce ? undefined : { y: -2 }}
+                  className="cursor-default rounded-md border border-neutral-200 px-3 py-1.5 text-xs font-medium text-neutral-600 transition-colors duration-200 hover:border-[#F15A24] hover:text-[#E34C19] dark:border-neutral-800 dark:text-neutral-400 dark:hover:text-[#FF875B]"
                 >
                   {tool}
-                </span>
+                </motion.li>
               ))}
-            </div>
+            </motion.ul>
           </div>
-
         </div>
-      </motion.article>
+      </article>
     </section>
   );
 }

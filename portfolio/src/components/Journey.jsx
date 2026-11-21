@@ -3,610 +3,558 @@
 import * as React from "react";
 
 /* ---------------------------------------------------------------------------
- * JourneyMetro — Unobstructed Floating Modal Edition (Single-file, React)
+ * Journey — Orbit / Globe edition (single file, plain JSX, no dependencies)
  *
- *   <Journey journey={journey} />     // journey = [{ year, title, description }]
+ *   <Journey />                         // uses the built-in data below
+ *   <Journey journey={journey} />       // journey = [{ year, title, description, date?, icon? }]
  *
- * - The entire transit track and train remain completely unblocked and visible.
- * - Clicking any station opens a sleek modal card positioned in the corner or
- *   centered overlay without blocking the active route canvas.
- * - Includes 2-car articulated train, spring physics, keyboard navigation,
- *   and autoplay progress indicator.
+ * - Open on the page: no box, no border, transparent background.
+ * - Theme follows your site automatically through CSS: it reacts to a `.dark`
+ *   class (or data-theme="dark") on any ancestor, e.g. <html class="dark">.
+ *   Force one with theme="dark" | "light"; default is "auto".
  * ------------------------------------------------------------------------- */
 
-const TAGS = ["Foundations", "Full-Stack", "Production", "Launch"];
-const GLYPHS = ["</>", "{ }", "▲", "✦"];
-const COLORS = [
-  ["#e5262c", "#7a0f14"],
-  ["#f97316", "#7c2d12"],
-  ["#8b5cf6", "#3b1d8a"],
-  ["#10b981", "#064e3b"],
+/* ------------------------------ Icons & data ------------------------------ */
+
+const Svg = ({ children }) => (
+  <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+    {children}
+  </svg>
+);
+
+const ICONS = {
+  code: (<Svg><path d="m16 18 6-6-6-6M8 6l-6 6 6 6" /></Svg>),
+  layers: (<Svg><path d="m12 2 10 5-10 5L2 7l10-5ZM2 12l10 5 10-5M2 17l10 5 10-5" /></Svg>),
+  rocket: (
+    <Svg>
+      <path d="M5 15c-1.5 1.3-2 5-2 5s3.7-.5 5-2M12 15 9 12M14 4c3-1.5 6-1 6-1s.5 3-1 6l-6 6-5-5 6-6Z" />
+      <circle cx="15" cy="9" r="1" />
+    </Svg>
+  ),
+  server: (
+    <Svg>
+      <rect x="3" y="4" width="18" height="6" rx="2" />
+      <rect x="3" y="14" width="18" height="6" rx="2" />
+      <path d="M7 7h.01M7 17h.01" />
+    </Svg>
+  ),
+  star: (<Svg><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9L12 3Z" /></Svg>),
+  users: (
+    <Svg>
+      <circle cx="9" cy="8" r="3.5" />
+      <path d="M2.5 20c.5-3.5 3.2-5.5 6.5-5.5s6 2 6.5 5.5M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c2 .6 3.2 2.3 3.5 5.2" />
+    </Svg>
+  ),
+  shield: (
+    <Svg>
+      <path d="M12 3 4 6v6c0 4.5 3.2 8 8 9 4.8-1 8-4.5 8-9V6l-8-3Z" />
+      <path d="m9 12 2 2 4-4" />
+    </Svg>
+  ),
+  zap: (<Svg><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z" /></Svg>),
+  book: (<Svg><path d="M4 5a2 2 0 0 1 2-2h14v16H6a2 2 0 0 0-2 2V5ZM4 19a2 2 0 0 1 2-2h14" /></Svg>),
+  globe: (
+    <Svg>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M3 12h18M12 3c2.5 2.5 3.5 5.5 3.5 9s-1 6.5-3.5 9c-2.5-2.5-3.5-5.5-3.5-9S9.5 5.5 12 3Z" />
+    </Svg>
+  ),
+};
+
+/* Built-in journey — replace with your own whenever you like. */
+export const DEFAULT_JOURNEY = [
+  // 2021 — Foundations
+  { year: 2021, date: "Jan", title: "Wrote my first line of code", icon: ICONS.code,
+    description: "Started with HTML, CSS and vanilla JavaScript — building tiny pages just to see something move on screen." },
+  { year: 2021, date: "Jun", title: "Learned the fundamentals", icon: ICONS.book,
+    description: "Worked through data structures, Git, and the command line. Learned that debugging is most of the job." },
+  { year: 2021, date: "Nov", title: "First portfolio site", icon: ICONS.globe,
+    description: "Shipped a hand-built portfolio with a responsive layout and a contact form — my first real deployment." },
+
+  // 2022 — Frameworks
+  { year: 2022, date: "Mar", title: "Picked up React", icon: ICONS.layers,
+    description: "Moved from DOM scripting to components, props and hooks, and rebuilt old projects the React way." },
+  { year: 2022, date: "Sep", title: "Open-source contribution", icon: ICONS.users,
+    description: "Landed my first merged pull request: a small accessibility fix that taught me how real review cycles work." },
+
+  // 2023 — Full-Stack
+  { year: 2023, date: "Feb", title: "Went full-stack", icon: ICONS.server,
+    description: "Built APIs with Node and Postgres, added authentication, and wired up a complete end-to-end product." },
+  { year: 2023, date: "Jul", title: "TypeScript everywhere", icon: ICONS.shield,
+    description: "Adopted TypeScript across the stack. Fewer runtime surprises, far more confident refactors." },
+  { year: 2023, date: "Dec", title: "First freelance client", icon: ICONS.star,
+    description: "Delivered a booking platform for a small business — scoping, building, and supporting it after launch." },
+
+  // 2024 — Production
+  { year: 2024, date: "Apr", title: "Production at scale", icon: ICONS.zap,
+    description: "Joined a product team: CI/CD pipelines, monitoring, caching and performance budgets became daily habits." },
+  { year: 2024, date: "Oct", title: "Led a feature end to end", icon: ICONS.users,
+    description: "Owned a customer-facing feature from design review to rollout, and mentored two junior developers along the way." },
+
+  // 2025 — Launch
+  { year: 2025, date: "May", title: "Launched my own product", icon: ICONS.rocket,
+    description: "Took a side project to public launch, collected real feedback, and iterated weekly based on what users did." },
+  { year: 2025, date: "Nov", title: "Reached my first 1,000 users", icon: ICONS.star,
+    description: "Crossed a thousand active users with zero ad spend, driven by writing, demos and word of mouth." },
+
+  // 2026 — Now
+  { year: 2026, date: "Mar", title: "Building with AI", icon: ICONS.zap,
+    description: "Integrating LLM features into products and designing the evals, guardrails and UX that make them dependable." },
+  { year: 2026, date: "Aug", title: "Speaking & teaching", icon: ICONS.book,
+    description: "Giving talks and workshops on modern front-end engineering, and sharing what I've learned in public." },
 ];
-const PORTRAIT_BELOW = 640;
 
-const cx = (...c) => c.filter(Boolean).join(" ");
-const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
-const clip = (s, m) => (s.length > m ? s.slice(0, m - 1) + "…" : s);
-
-function cover(year, glyph, [from, to], index) {
-  const esc = glyph.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  const stn = `STN-${String(index + 1).padStart(2, "0")}`;
-  const svg =
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400">' +
-    `<defs>` +
-    `<linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${from}"/><stop offset="1" stop-color="${to}"/></linearGradient>` +
-    `<pattern id="p" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#fff" stroke-opacity=".08" stroke-width="1"/></pattern>` +
-    `</defs>` +
-    '<rect width="640" height="400" fill="url(#g)"/>' +
-    '<rect width="640" height="400" fill="url(#p)"/>' +
-    '<path d="M-40 340 L180 340 L340 180 L680 180" fill="none" stroke="#fff" stroke-opacity=".14" stroke-width="18" stroke-linecap="round"/>' +
-    `<text x="320" y="265" text-anchor="middle" font-family="Arial Black, Helvetica, sans-serif" font-size="180" font-weight="900" fill="none" stroke="#fff" stroke-opacity=".32" stroke-width="3">${year}</text>` +
-    `<text x="38" y="84" font-family="Menlo, Consolas, monospace" font-size="44" font-weight="700" fill="#fff" fill-opacity=".92">${esc}</text>` +
-    `<rect x="488" y="46" width="114" height="34" rx="17" fill="#000" fill-opacity=".28"/>` +
-    `<text x="545" y="68" text-anchor="middle" font-family="Menlo, Consolas, monospace" font-size="16" font-weight="700" letter-spacing="1.5" fill="#fff" fill-opacity=".92">${stn}</text>` +
-    "</svg>";
-  return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+function groupByYear(items) {
+  const map = new Map();
+  items.forEach((it) => {
+    const key = String(it.year);
+    if (!map.has(key)) map.set(key, { year: it.year, events: [] });
+    map.get(key).events.push({
+      date: it.date,
+      title: it.title,
+      description: it.description,
+      icon: it.icon,
+    });
+  });
+  return Array.from(map.values());
 }
 
-// Roomy geometry
-function geometry(portrait, n) {
-  if (!portrait) {
-    return { w: 1400, h: 480, pts: [[100, 380], [500, 380], [780, 130], [1300, 130]] };
-  }
-  const h = 320 + Math.max(n, 2) * 120;
-  return { w: 440, h, pts: [[90, 80], [90, h * 0.28], [210, h * 0.28 + 120], [210, h - 120]] };
+/* --------------------------------- Styles --------------------------------- */
+
+const STYLE_ID = "orbit-timeline-styles-v2";
+
+// Selector helpers: "dark" = site has .dark / data-theme="dark" on an ancestor
+// (unless this instance is forced light), or this instance is forced dark.
+const DARK_ROOT =
+  '.dark .ot-root:not([data-ot="light"]), [data-theme="dark"] .ot-root:not([data-ot="light"]), .ot-root[data-ot="dark"]';
+const dk = (s) =>
+  [
+    `.dark .ot-root:not([data-ot="light"]) ${s}`,
+    `[data-theme="dark"] .ot-root:not([data-ot="light"]) ${s}`,
+    `.ot-root[data-ot="dark"] ${s}`,
+  ].join(", ");
+
+const CSS = `
+@property --ot-k { syntax: '<number>'; inherits: false; initial-value: 1; }
+@property --ot-rr { syntax: '<length>'; inherits: false; initial-value: 0px; }
+.ot-root, .ot-root *, .ot-root *::before { box-sizing: border-box; }
+
+/* Light (base) */
+.ot-root { position: relative; width: 100%; height: 100%; min-height: 360px; overflow: hidden; background: transparent; color: rgb(var(--ot-fg));
+  -webkit-tap-highlight-color: transparent; --ot-glow: .6;
+  --ot-o1: #ffffff; --ot-o2: #a3a3aa; --ot-o3: #dadadf;
+  --ot-ac: #E34C19; --ot-on-ac: #ffffff; --ot-bg: #f7f7f5; --ot-fg: 23,23,26;
+  --ot-ig0: rgba(23,23,26,.5); --ot-ig1: rgba(23,23,26,.95); color-scheme: light; }
+/* Dark */
+${DARK_ROOT} { --ot-o1: #e4e4e8; --ot-o2: #3e3e45; --ot-o3: #96969e; --ot-ac: #FF875B; --ot-on-ac: #111114; --ot-bg: #0f1117; --ot-fg: 255,255,255;
+  --ot-ig0: rgba(255,255,255,.95); --ot-ig1: rgba(255,255,255,.4); color-scheme: dark; }
+
+.ot-orbit { position: absolute; left: 50%; top: 50%; border-radius: 50%; pointer-events: none; --ot-rw: 2px; --ot-g0: 0deg; --ot-g1: 0deg;
+  transform: translate(-50%, -50%) scale(var(--ot-s, 1)); opacity: var(--ot-o, 1); transition: opacity .5s, transform .9s cubic-bezier(.2,.8,.2,1); }
+.ot-orbit > i { position: absolute; inset: 0; border-radius: 50%; display: block; transition: opacity .45s;
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--ot-rw)), #000 calc(100% - var(--ot-rw) + .25px), #000 100%),
+    conic-gradient(from 0deg, transparent var(--ot-g0), #000 var(--ot-g1), #000 calc(360deg - var(--ot-g1)), transparent calc(360deg - var(--ot-g0)));
+  -webkit-mask-composite: source-in;
+  mask: radial-gradient(farthest-side, transparent calc(100% - var(--ot-rw)), #000 calc(100% - var(--ot-rw) + .25px), #000 100%),
+    conic-gradient(from 0deg, transparent var(--ot-g0), #000 var(--ot-g1), #000 calc(360deg - var(--ot-g1)), transparent calc(360deg - var(--ot-g0)));
+  mask-composite: intersect; }
+/* orbit lines: light base */
+.ot-orbit .ot-ln { background: conic-gradient(from -70deg, rgba(var(--ot-fg), .4), rgba(var(--ot-fg), .55) 25%, rgba(var(--ot-fg), .75) 50%, rgba(var(--ot-fg), .55) 75%, rgba(var(--ot-fg), .4));
+  filter: drop-shadow(0 -.5px 0 rgba(255,255,255,.95)) drop-shadow(0 1px 1.5px rgba(0,0,0,.09)); }
+.ot-orbit .ot-ac { --ot-rw: 3px; opacity: 0; background: var(--ot-ac); filter: drop-shadow(0 0 3px color-mix(in srgb, var(--ot-ac) 60%, transparent)); }
+/* orbit lines: dark */
+${dk(".ot-orbit .ot-ln")} { background: conic-gradient(from -70deg, rgba(var(--ot-fg), .85), rgba(var(--ot-fg), .45) 25%, rgba(var(--ot-fg), .28) 50%, rgba(var(--ot-fg), .45) 75%, rgba(var(--ot-fg), .85));
+  filter: drop-shadow(0 0 calc(7px * var(--ot-glow)) rgba(var(--ot-fg), .45)); }
+${dk(".ot-orbit .ot-ac")} { background: conic-gradient(from -70deg, var(--ot-ac), color-mix(in srgb, var(--ot-ac) 55%, transparent) 25%, color-mix(in srgb, var(--ot-ac) 22%, transparent) 50%, color-mix(in srgb, var(--ot-ac) 55%, transparent) 75%, var(--ot-ac));
+  filter: drop-shadow(0 0 calc(9px * var(--ot-glow)) var(--ot-ac)) drop-shadow(0 0 calc(2px * var(--ot-glow)) var(--ot-ac)); }
+.ot-orbit.ot-on .ot-ac { opacity: 1; }
+.ot-orbit.ot-on .ot-ln { opacity: 0; }
+.ot-root.ot-focus .ot-orbit:not(.ot-on) .ot-ln { opacity: .35; }
+.ot-orbit.ot-hidden { --ot-s: .2; --ot-o: 0; }
+
+.ot-year { position: absolute; transform: translate(-50%, -50%); white-space: nowrap; cursor: pointer; background: none; border: 0; padding: 2px 4px; margin: 0;
+  font: 700 14px/1 var(--ot-year-font); letter-spacing: .12em; font-variant-numeric: lining-nums tabular-nums;
+  color: rgba(var(--ot-fg), .92); transition: color .35s, opacity .6s; z-index: 2; }
+.ot-year:hover { color: rgba(var(--ot-fg), .9); }
+.ot-year:focus-visible, .ot-node:focus-visible, .ot-card button:focus-visible { outline: 2px solid rgba(var(--ot-fg), .6); outline-offset: 2px; }
+.ot-year.ot-on { color: var(--ot-ac); text-shadow: 0 0 4px color-mix(in srgb, var(--ot-ac) 35%, transparent); }
+.ot-root.ot-focus .ot-year:not(.ot-on) { color: rgba(var(--ot-fg), .5); }
+.ot-year.ot-hidden { opacity: 0; }
+.ot-root.ot-no-years .ot-year { display: none; }
+
+.ot-core { position: absolute; left: 50%; top: 50%; border-radius: 50%; z-index: 1; animation: ot-breathe 5s ease-in-out infinite; }
+.ot-core-fill { position: absolute; inset: 0; border-radius: 50%; overflow: hidden; isolation: isolate; background: var(--ot-o2); }
+.ot-blob { position: absolute; width: 70%; height: 70%; border-radius: 50%; filter: blur(calc(var(--ot-cs, 28px) * .14)); will-change: transform; }
+.ot-b1 { background: var(--ot-o1); left: -5%; top: -10%; animation: ot-d1 9s ease-in-out infinite; }
+.ot-b2 { background: var(--ot-o2); right: -10%; top: 10%; animation: ot-d2 11s ease-in-out infinite; }
+.ot-b3 { background: var(--ot-o3); left: 15%; bottom: -15%; animation: ot-d3 8s ease-in-out infinite; }
+.ot-b4 { background: #fff; width: 36%; height: 36%; left: 28%; top: 26%; opacity: .18; animation: ot-d4 7s ease-in-out infinite; }
+.ot-core-gloss { position: absolute; inset: 0; border-radius: 50%; pointer-events: none; background: radial-gradient(circle at 32% 26%, rgba(255,255,255,.5) 0, rgba(255,255,255,0) 34%); }
+.ot-core-shine { position: absolute; left: 18%; top: 9%; width: 40%; height: 26%; border-radius: 50%; transform: rotate(-20deg); filter: blur(1.5px); opacity: .35;
+  background: radial-gradient(ellipse at 50% 35%, rgba(255,255,255,.8) 0, rgba(255,255,255,.2) 50%, rgba(255,255,255,0) 75%); }
+.ot-emit { position: absolute; left: 50%; top: 50%; width: var(--ot-rr); height: var(--ot-rr); border-radius: 50%; pointer-events: none; z-index: 1;
+  transform: translate(-50%, -50%); border: 1px solid rgba(var(--ot-fg), .45); opacity: 0; animation: ot-emit 4.2s cubic-bezier(.25,.6,.35,1) infinite; }
+.ot-emit-2 { animation-delay: 1.4s; } .ot-emit-3 { animation-delay: 2.8s; }
+@keyframes ot-emit { 0% { --ot-rr: var(--ot-from); opacity: 0; } 30% { opacity: .38; } 75% { opacity: .08; } 100% { --ot-rr: var(--ot-to); opacity: 0; } }
+@keyframes ot-breathe { 0%,100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+@keyframes ot-d1 { 0%,100% { transform: translate(0,0) scale(1); } 33% { transform: translate(30%, 25%) scale(1.2); } 66% { transform: translate(10%, 45%) scale(.9); } }
+@keyframes ot-d2 { 0%,100% { transform: translate(0,0) scale(1); } 33% { transform: translate(-35%, 30%) scale(1.1); } 66% { transform: translate(-15%, -10%) scale(1.3); } }
+@keyframes ot-d3 { 0%,100% { transform: translate(0,0) scale(1); } 33% { transform: translate(25%, -40%) scale(1.15); } 66% { transform: translate(-20%, -20%) scale(.95); } }
+@keyframes ot-d4 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-25%, -30%) scale(1.3); } }
+
+/* nodes: light base */
+.ot-node { position: absolute; left: 0; top: 0; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%; border: 0; padding: 0;
+  display: grid; place-items: center; cursor: pointer; z-index: 3; color: rgb(var(--ot-fg));
+  --ot-ring: conic-gradient(from -70deg, rgba(var(--ot-fg), .55), rgba(var(--ot-fg), .7) 25%, rgba(var(--ot-fg), .9) 50%, rgba(var(--ot-fg), .7) 75%, rgba(var(--ot-fg), .55));
+  background: rgba(255,255,255,.95); -webkit-backdrop-filter: blur(6px) saturate(1.2); backdrop-filter: blur(6px) saturate(1.2);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.95), 0 1px 2px rgba(0,0,0,.05), 0 6px 14px -8px rgba(0,0,0,.14);
+  transition: color .3s, opacity .35s, box-shadow .3s, background .3s, --ot-k .3s cubic-bezier(.2,.8,.2,1); }
+/* nodes: dark */
+${dk(".ot-node")} { color: rgb(var(--ot-fg));
+  --ot-ring: conic-gradient(from -70deg, rgba(var(--ot-fg), .95), rgba(var(--ot-fg), .6) 25%, rgba(var(--ot-fg), .45) 50%, rgba(var(--ot-fg), .6) 75%, rgba(var(--ot-fg), .95));
+  background: rgba(18, 20, 26, .85); box-shadow: inset 0 1px 0 rgba(255,255,255,.06); }
+.ot-node::before { content: ""; position: absolute; inset: 0; border-radius: 50%; pointer-events: none; background: var(--ot-ring); transition: opacity .3s;
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 1.1px), #000 calc(100% - .85px)); mask: radial-gradient(farthest-side, transparent calc(100% - 1.1px), #000 calc(100% - .85px)); }
+.ot-node svg { width: 14px; height: 14px; position: relative; stroke: var(--ot-ig); stroke-width: 2; fill: none; }
+.ot-node .ot-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; position: relative; }
+.ot-node:hover::before { filter: brightness(1.4); }
+.ot-root.ot-root .ot-node:hover { color: rgb(var(--ot-fg)); }
+/* node states (doubled root class = beats the dark selectors above) */
+.ot-root.ot-root .ot-node.ot-on { color: var(--ot-ac); --ot-ring: var(--ot-ac); }
+.ot-root.ot-root .ot-node.ot-on svg, .ot-root.ot-root .ot-node.ot-sel svg { stroke: currentColor; }
+.ot-root.ot-focus .ot-node:not(.ot-on) { opacity: .55; }
+.ot-root.ot-root .ot-node.ot-sel { --ot-k: 1.3; background: var(--ot-ac); color: var(--ot-on-ac); --ot-ring: var(--ot-ac);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--ot-ac) 12%, transparent), 0 8px 18px -8px color-mix(in srgb, var(--ot-ac) 70%, transparent); }
+${dk(".ot-node.ot-sel")} { box-shadow: 0 0 0 6px color-mix(in srgb, var(--ot-ac) 14%, transparent), 0 0 14px color-mix(in srgb, var(--ot-ac) 45%, transparent); }
+.ot-root.ot-root .ot-node.ot-hidden { opacity: 0 !important; --ot-k: .4; }
+
+.ot-card { position: absolute; left: 0; top: 0; width: 268px; padding: 16px 16px 14px; border-radius: 14px; z-index: 4; text-align: left;
+  background: color-mix(in srgb, var(--ot-bg) 96%, transparent); -webkit-backdrop-filter: blur(16px) saturate(1.3); backdrop-filter: blur(16px) saturate(1.3);
+  border: 1px solid rgba(var(--ot-fg), .28); box-shadow: 0 24px 60px -24px rgba(0,0,0,.35);
+  opacity: 0; transform: translateY(6px) scale(.98); pointer-events: none; transition: opacity .25s, transform .3s cubic-bezier(.2,.8,.2,1); }
+.ot-card.ot-open { opacity: 1; transform: none; pointer-events: auto; }
+.ot-card-meta { display: flex; justify-content: space-between; gap: 12px; font: 700 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .1em; text-transform: uppercase; color: var(--ot-ac); }
+.ot-card-meta span:last-child { color: rgba(var(--ot-fg), .7); }
+.ot-card-title { margin: 10px 0 6px; font-size: 18px; line-height: 1.25; font-weight: 700; letter-spacing: -.01em; color: rgb(var(--ot-fg)); font-family: var(--ot-year-font); }
+.ot-card-text { margin: 0; font-size: 14px; line-height: 1.55; color: rgba(var(--ot-fg), .9); }
+.ot-card-nav { display: flex; gap: 6px; margin-top: 14px; }
+.ot-card-nav button { appearance: none; flex: 1; border: 1px solid rgba(var(--ot-fg), .14); background: transparent; color: rgba(var(--ot-fg), .75);
+  font: inherit; font-size: 12px; font-weight: 600; padding: 6px 8px; border-radius: 8px; cursor: pointer; }
+.ot-card-nav button:hover { border-color: var(--ot-ac); color: var(--ot-ac); }
+@media (prefers-reduced-motion: reduce) { .ot-core, .ot-core *, .ot-emit { animation: none !important; } .ot-emit { display: none; } }
+`;
+
+function useStyles() {
+  React.useInsertionEffect?.(() => {
+    if (typeof document === "undefined" || document.getElementById(STYLE_ID)) return;
+    const el = document.createElement("style");
+    el.id = STYLE_ID;
+    el.textContent = CSS;
+    document.head.appendChild(el);
+  }, []);
 }
 
-function roundedPath(pts, cut = 64) {
-  let d = `M${pts[0][0]} ${pts[0][1]}`;
-  for (let i = 1; i < pts.length - 1; i++) {
-    const [px, py] = pts[i];
-    const [ax, ay] = pts[i - 1];
-    const [bx, by] = pts[i + 1];
-    const l1 = Math.hypot(px - ax, py - ay);
-    const l2 = Math.hypot(bx - px, by - py);
-    const c = Math.min(cut, l1 / 2, l2 / 2);
-    const sx = px - ((px - ax) / l1) * c;
-    const sy = py - ((py - ay) / l1) * c;
-    const ex = px + ((bx - px) / l2) * c;
-    const ey = py + ((by - py) / l2) * c;
-    d += ` L${sx.toFixed(1)} ${sy.toFixed(1)} Q${px} ${py} ${ex.toFixed(1)} ${ey.toFixed(1)}`;
-  }
-  const last = pts[pts.length - 1];
-  return d + ` L${last[0]} ${last[1]}`;
-}
+/* ------------------------------ Orbit timeline ----------------------------- */
 
-export default function Journey({ journey = [], autoplay = true, interval = 4500 }) {
+function OrbitTimeline({
+  data,
+  theme = "auto",
+  showYears = true,
+  speed = 1,
+  direction = "same",
+  intro = true,
+  replayKey = 0,
+  yearFont = "'Space Grotesk', ui-sans-serif, system-ui, -apple-system, sans-serif",
+  onSelect,
+  className,
+  style,
+}) {
+  useStyles();
   const uid = React.useId().replace(/[^a-zA-Z0-9_-]/g, "");
-  const wrapRef = React.useRef(null);
-  const pathRef = React.useRef(null);
-  const progRef = React.useRef(null);
-  const glowRef = React.useRef(null);
-  const car1Ref = React.useRef(null);
-  const car2Ref = React.useRef(null);
-  const floatingRef = React.useRef(null);
+  const gradId = `ot-ig-${uid}`;
 
-  const pos = React.useRef(0);
-  const vel = React.useRef(0);
-  const layoutRef = React.useRef(null);
-  const activeRef = React.useRef(0);
-
-  const [portrait, setPortrait] = React.useState(false);
-  const [layout, setLayout] = React.useState(null);
-  const [active, setActive] = React.useState(0);
-  const [hovered, setHovered] = React.useState(null);
-  const [playing, setPlaying] = React.useState(autoplay);
-  const [hold, setHold] = React.useState(false);
-  const [inView, setInView] = React.useState(true);
-  const [reduced, setReduced] = React.useState(false);
-  const [inspectIndex, setInspectIndex] = React.useState(null); // null = no floating card open
-
-  const items = React.useMemo(
-    () =>
-      journey.map((item, i) => ({
-        date: item.year,
-        title: item.title,
-        description: item.description,
-        tag: item.tag || TAGS[i % TAGS.length],
-        color: item.color || COLORS[i % COLORS.length][0],
-        image: item.image || cover(item.year, GLYPHS[i % GLYPHS.length], COLORS[i % COLORS.length], i),
-      })),
-    [journey],
-  );
-
-  const n = items.length;
-  const geo = React.useMemo(() => geometry(portrait, n), [portrait, n]);
-  const d = React.useMemo(() => roundedPath(geo.pts), [geo]);
-  const safe = Math.min(active, Math.max(0, n - 1));
-  activeRef.current = safe;
-  layoutRef.current = layout;
-
-  React.useEffect(() => {
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const update = () => setReduced(media.matches);
-    update();
-    media.addEventListener("change", update);
-    return () => media.removeEventListener("change", update);
-  }, []);
-
-  React.useLayoutEffect(() => {
-    const node = wrapRef.current;
-    if (!node) return;
-    const measure = () => setPortrait(node.clientWidth < PORTRAIT_BELOW);
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(node);
-    return () => ro.disconnect();
-  }, []);
-
-  React.useEffect(() => {
-    const node = wrapRef.current;
-    if (!node || typeof IntersectionObserver === "undefined") return;
-    const io = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { threshold: 0.25 });
-    io.observe(node);
-    return () => io.disconnect();
-  }, []);
-
-  // Measure route
-  React.useLayoutEffect(() => {
-    const path = pathRef.current;
-    if (!path || n === 0) return;
-    const len = path.getTotalLength();
-    const samples = [];
-    for (let a = 0; a <= len; a += 8) {
-      const p = path.getPointAtLength(a);
-      samples.push({ x: p.x, y: p.y });
-    }
-    const clear = (x, y) => samples.reduce((m, p) => Math.min(m, Math.hypot(p.x - x, p.y - y)), Infinity);
-    const padding = Math.min(len * 0.08, 90);
-    const usableLen = len - padding * 2;
-
-    const stops = items.map((_, k) => {
-      const at = n === 1 ? len / 2 : padding + (usableLen * k) / (n - 1);
-      const p = path.getPointAtLength(at);
-      return { x: p.x, y: p.y, at };
+  const flat = React.useMemo(() => {
+    const out = [];
+    data.forEach((y, yi) => {
+      const n = Math.max(1, y.events.length);
+      y.events.forEach((_, ei) => out.push({ yi, ei, a0: yi * 1.3 + 0.4 + ei * ((Math.PI * 2) / n) }));
     });
+    return out;
+  }, [data]);
 
-    const labels = stops.map((s, k) => {
-      if (portrait) {
-        let mx = s.x;
-        samples.forEach((p) => {
-          if (Math.abs(p.y - s.y) <= 28 && p.x > mx) mx = p.x;
-        });
-        return { x: mx + 30, anchor: "start", side: 0 };
-      }
-      let side = k % 2 === 0 ? -1 : 1;
-      if (clear(s.x, s.y + side * 55) < 42 && clear(s.x, s.y - side * 55) > clear(s.x, s.y + side * 55)) side = -side;
-      return { x: clamp(s.x, 110, geo.w - 110), anchor: "middle", side };
-    });
+  const [sel, setSel] = React.useState(-1);
+  const [hover, setHover] = React.useState(-1);
+  const [shown, setShown] = React.useState(intro ? 0 : data.length);
+  const [nodesShown, setNodesShown] = React.useState(intro ? 0 : data.length);
 
-    layoutRef.current = { len, stops, labels };
-    pos.current = stops[Math.min(activeRef.current, n - 1)].at;
-    vel.current = 0;
-    setLayout({ len, stops, labels });
-  }, [d, n, portrait, items, geo.w]);
+  const root = React.useRef(null);
+  const card = React.useRef(null);
+  const core = React.useRef(null);
+  const orbitEls = React.useRef([]);
+  const yearEls = React.useRef([]);
+  const nodeEls = React.useRef([]);
+  const emitEls = React.useRef([]);
 
-  const paint = React.useCallback(() => {
-    const L = layoutRef.current;
-    const path = pathRef.current;
-    if (!L || !path) return;
+  // Live values read by the animation loop without re-rendering.
+  const live = React.useRef({ speed, direction, sel, hover, showYears });
+  live.current = { speed, direction, sel, hover, showYears };
+  const geo = React.useRef({ w: 0, h: 0, cx: 0, cy: -1, cyBase: 0, cyUp: 0, narrow: false, r: [] });
 
-    const placeCar = (el, dist) => {
+  const placeY = React.useCallback(() => {
+    const g = geo.current;
+    orbitEls.current.forEach((el) => { if (el) el.style.top = g.cy + "px"; });
+    yearEls.current.forEach((el, i) => { if (el) el.style.top = g.cy - (g.r[i] ?? 0) + "px"; });
+    if (core.current) core.current.style.top = g.cy + "px";
+    emitEls.current.forEach((el) => { if (el) el.style.top = g.cy + "px"; });
+  }, []);
+
+  const placeGaps = React.useCallback(() => {
+    const g = geo.current, k = 180 / Math.PI, off = !live.current.showYears;
+    orbitEls.current.forEach((el, i) => {
       if (!el) return;
-      const clamped = clamp(dist, 0, L.len);
-      const p = path.getPointAtLength(clamped);
-      const a = path.getPointAtLength(Math.min(L.len, clamped + 3));
-      const b = path.getPointAtLength(Math.max(0, clamped - 3));
-      const ang = (Math.atan2(a.y - b.y, a.x - b.x) * 180) / Math.PI;
-      el.setAttribute("transform", `translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) rotate(${ang.toFixed(1)})`);
-    };
-
-    const at = pos.current;
-    placeCar(car1Ref.current, at);
-    placeCar(car2Ref.current, Math.max(0, at - 38));
-
-    const dash = `${at} ${L.len + 20}`;
-    if (progRef.current) progRef.current.style.strokeDasharray = dash;
-    if (glowRef.current) glowRef.current.style.strokeDasharray = dash;
+      const r = g.r[i] || 1, hw = (yearEls.current[i]?.offsetWidth ?? 0) / 2;
+      el.style.setProperty("--ot-g0", off ? "0deg" : ((hw + 1) / r) * k + "deg");
+      el.style.setProperty("--ot-g1", off ? "0deg" : ((hw + 18) / r) * k + "deg");
+    });
   }, []);
 
+  const layout = React.useCallback(() => {
+    const el = root.current;
+    if (!el) return;
+    const g = geo.current, w = el.clientWidth, h = el.clientHeight, m = Math.min(w, h), n = data.length;
+    g.w = w; g.h = h; g.cx = w / 2; g.cyBase = h / 2; g.cyUp = Math.min(h / 2, w * 0.5 + 24); g.narrow = w < 640;
+    if (g.cy < 0) g.cy = g.cyBase;
+    const r0 = Math.max(58, m * 0.11), r1 = m * 0.46;
+    g.r = data.map((_, i) => (n > 1 ? r0 + ((r1 - r0) * i) / (n - 1) : r1));
+    orbitEls.current.forEach((o, i) => { if (o) { o.style.width = o.style.height = g.r[i] * 2 + "px"; } });
+    yearEls.current.forEach((y) => { if (y) y.style.left = g.cx + "px"; });
+    const cd = Math.round(Math.min(28, (g.r[0] ?? 60) * 0.42));
+    if (core.current) {
+      core.current.style.width = core.current.style.height = cd + "px";
+      core.current.style.margin = `${-cd / 2}px 0 0 ${-cd / 2}px`;
+      core.current.style.setProperty("--ot-cs", cd + "px");
+    }
+    emitEls.current.forEach((e) => {
+      if (!e) return;
+      e.style.setProperty("--ot-from", cd + 2 + "px");
+      e.style.setProperty("--ot-to", (g.r[0] ?? 60) * 2 - 14 + "px");
+    });
+    placeGaps();
+    placeY();
+  }, [data, placeGaps, placeY]);
+
   React.useLayoutEffect(() => {
-    paint();
-  }, [layout, paint]);
+    layout();
+    const ro = new ResizeObserver(layout);
+    if (root.current) ro.observe(root.current);
+    document.fonts?.ready.then(placeGaps).catch(() => {});
+    return () => ro.disconnect();
+  }, [layout, placeGaps]);
 
-  // Train physics
+  React.useEffect(() => { placeGaps(); }, [showYears, placeGaps]);
+
+  // Growth intro: years appear from the centre outward, their events right after.
   React.useEffect(() => {
-    if (!layout) return;
-    const target = layout.stops[safe].at;
-    if (reduced) {
-      pos.current = target;
-      vel.current = 0;
-      paint();
-      return;
-    }
-    let raf = 0;
-    let last = 0;
-    const stiffness = 45;
-    const damping = 13;
+    if (!intro && replayKey === 0) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    setSel(-1);
+    setShown(0); setNodesShown(0);
+    const timers = [];
+    data.forEach((_, i) => {
+      const at = reduce ? 0 : 200 + i * 230;
+      timers.push(window.setTimeout(() => setShown((s) => Math.max(s, i + 1)), at));
+      timers.push(window.setTimeout(() => setNodesShown((s) => Math.max(s, i + 1)), at + (reduce ? 0 : 380)));
+    });
+    return () => timers.forEach(clearTimeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [replayKey, data.length]);
 
-    const frame = (t) => {
-      const dt = Math.min(0.04, (t - (last || t)) / 1000);
-      last = t;
-      const diff = target - pos.current;
-      if (Math.abs(diff) < 0.35 && Math.abs(vel.current) < 1) {
-        pos.current = target;
-        vel.current = 0;
-        paint();
-        return;
+  // Orbit animation and card placement.
+  React.useEffect(() => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let raf = 0, last = 0, t = 0;
+    const tick = (now) => {
+      const dt = Math.min(0.05, (now - last) / 1000 || 0.016); last = now;
+      const L = live.current, g = geo.current;
+      if (L.sel < 0 && L.hover < 0 && !reduce) t += dt * L.speed;
+      const ty = g.narrow && L.sel >= 0 ? g.cyUp : g.cyBase;
+      if (Math.abs(ty - g.cy) > 0.3) { g.cy += (ty - g.cy) * Math.min(1, dt * 8); placeY(); }
+      let sx = 0, sy = 0;
+      flat.forEach((f, i) => {
+        const el = nodeEls.current[i]; if (!el) return;
+        const r = g.r[f.yi] ?? 0, dir = L.direction === "alternate" && f.yi % 2 ? -1 : 1;
+        const a = f.a0 + dir * t * ((0.16 * (g.r[0] ?? r)) / (r || 1));
+        const x = g.cx + r * Math.cos(a), y = g.cy + r * Math.sin(a);
+        el.style.transform = `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px) scale(var(--ot-k))`;
+        if (i === L.sel) { sx = x; sy = y; }
+      });
+      const c = card.current;
+      if (c && L.sel >= 0) {
+        let x, y;
+        if (g.narrow) { c.style.width = g.w - 24 + "px"; x = 12; y = g.h - c.offsetHeight - 12; }
+        else {
+          c.style.width = "";
+          const cw = c.offsetWidth, ch = c.offsetHeight;
+          x = sx >= g.cx ? sx + 34 : sx - 34 - cw;
+          if (x + cw > g.w - 12) x = sx - 34 - cw;
+          if (x < 12) x = Math.min(g.w - cw - 12, sx + 34);
+          y = Math.max(12, Math.min(g.h - ch - 12, sy - ch / 2));
+        }
+        c.style.transform = "";
+        c.style.left = x + "px"; c.style.top = y + "px";
       }
-      const accel = diff * stiffness - vel.current * damping;
-      vel.current += accel * dt;
-      pos.current += vel.current * dt;
-      paint();
-      raf = requestAnimationFrame(frame);
+      raf = requestAnimationFrame(tick);
     };
-    raf = requestAnimationFrame(frame);
+    raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [layout, safe, reduced, paint]);
+  }, [flat, placeY]);
 
-  // Autoplay loop
-  React.useEffect(() => {
-    if (!playing || hold || reduced || !inView || n < 2 || inspectIndex !== null) return;
-    const t = window.setInterval(() => setActive((a) => (a + 1) % n), interval);
-    return () => window.clearInterval(t);
-  }, [playing, hold, reduced, inView, n, interval, inspectIndex]);
+  const select = React.useCallback((i) => {
+    setSel(i);
+    if (!onSelect) return;
+    if (i < 0) onSelect(null);
+    else { const f = flat[i]; onSelect({ year: data[f.yi], event: data[f.yi].events[f.ei], index: i }); }
+  }, [flat, data, onSelect]);
 
-  // Floating card entrance animation
-  React.useEffect(() => {
-    if (inspectIndex === null || reduced || !floatingRef.current) return;
-    const a = floatingRef.current.animate(
-      [
-        { opacity: 0, transform: "translateY(10px) scale(0.97)" },
-        { opacity: 1, transform: "none" },
-      ],
-      { duration: 220, easing: "cubic-bezier(.16,1,.3,1)" },
-    );
-    return () => a.cancel();
-  }, [inspectIndex, reduced]);
+  const step = (d) => select((sel + d + flat.length) % flat.length);
+  const activeYear = sel >= 0 ? flat[sel]?.yi ?? -1 : hover;
+  const current = sel >= 0 ? flat[sel] : null;
+  const curYear = current ? data[current.yi] : null;
+  const curEvent = current && curYear ? curYear.events[current.ei] : null;
+  const pad = (n) => String(n).padStart(2, "0");
 
-  if (n === 0) return null;
-
-  const selectStop = (i) => {
-    setPlaying(false);
-    const clamped = clamp(i, 0, n - 1);
-    setActive(clamped);
+  const rootStyle = {
+    ...style,
+    "--ot-ig": `url(#${gradId})`,
+    "--ot-year-font": yearFont,
   };
-
-  const handleKeyDown = (e) => {
-    if (inspectIndex !== null) {
-      if (e.key === "Escape") setInspectIndex(null);
-      return;
-    }
-    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
-      e.preventDefault();
-      selectStop(safe + 1);
-    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
-      e.preventDefault();
-      selectStop(safe - 1);
-    }
-  };
-
-  const inspectItem = inspectIndex !== null ? items[inspectIndex] : null;
 
   return (
     <div
-      className="w-full text-foreground select-none relative"
-      onKeyDown={handleKeyDown}
-      onPointerEnter={(e) => e.pointerType === "mouse" && setHold(true)}
-      onPointerLeave={(e) => e.pointerType === "mouse" && setHold(false)}
+      ref={root}
+      data-ot={theme === "auto" ? undefined : theme}
+      role="region"
+      aria-label="Timeline"
+      className={["ot-root", activeYear >= 0 ? "ot-focus" : "", showYears ? "" : "ot-no-years", className].filter(Boolean).join(" ")}
+      style={rootStyle}
+      onClick={() => select(-1)}
+      onKeyDown={(e) => {
+        if (sel < 0) return;
+        if (e.key === "ArrowRight") step(1);
+        else if (e.key === "ArrowLeft") step(-1);
+        else if (e.key === "Escape") select(-1);
+      }}
     >
-      <div ref={wrapRef} className="mx-auto w-full max-w-[1280px] px-4 sm:px-8">
-        {/* Main Bounded Frame — 100% Unobstructed Train & Track View */}
+      <svg width="0" height="0" style={{ position: "absolute" }} aria-hidden="true">
+        <defs>
+          <linearGradient id={gradId} gradientUnits="userSpaceOnUse" x1="2" y1="2" x2="22" y2="22">
+            <stop offset="0" style={{ stopColor: "var(--ot-ig0)" }} />
+            <stop offset="1" style={{ stopColor: "var(--ot-ig1)" }} />
+          </linearGradient>
+        </defs>
+      </svg>
+
+      {data.map((y, i) => (
         <div
-          className={cx(
-            "relative mx-auto w-full overflow-hidden rounded-3xl border border-border bg-card/40 shadow-sm",
-            portrait && "max-w-[440px]",
-          )}
-          style={{ aspectRatio: `${geo.w} / ${geo.h}` }}
+          key={`o${i}`}
+          ref={(el) => { orbitEls.current[i] = el; }}
+          className={["ot-orbit", i === activeYear ? "ot-on" : "", i >= shown ? "ot-hidden" : ""].join(" ")}
         >
-          {/* Metro Map SVG */}
-          <svg
-            aria-hidden="true"
-            viewBox={`0 0 ${geo.w} ${geo.h}`}
-            className="absolute inset-0 size-full"
-            style={{ color: items[safe].color }}
-          >
-            <defs>
-              <pattern id={`${uid}-grid`} width="40" height="40" patternUnits="userSpaceOnUse">
-                <path d="M40 0H0V40" fill="none" stroke="currentColor" strokeWidth="1" className="text-foreground" />
-              </pattern>
-              <radialGradient id={`${uid}-fade`}>
-                <stop offset="0.6" stopColor="#fff" />
-                <stop offset="1" stopColor="#000" />
-              </radialGradient>
-              <mask id={`${uid}-mask`}>
-                <rect width={geo.w} height={geo.h} fill={`url(#${uid}-fade)`} />
-              </mask>
-              <linearGradient id={`${uid}-beam`} x1="0" y1="0.5" x2="1" y2="0.5">
-                <stop offset="0" stopColor="currentColor" stopOpacity="0.45" />
-                <stop offset="1" stopColor="currentColor" stopOpacity="0" />
-              </linearGradient>
-            </defs>
-
-            <rect width={geo.w} height={geo.h} fill={`url(#${uid}-grid)`} mask={`url(#${uid}-mask)`} opacity="0.06" />
-
-            <path d={d} fill="none" className="stroke-muted" strokeWidth="22" strokeLinecap="round" opacity="0.65" />
-            <path ref={pathRef} d={d} fill="none" className="stroke-border" strokeWidth="11" strokeLinecap="round" />
-            <path
-              d={d}
-              fill="none"
-              className="stroke-background"
-              strokeWidth="2.5"
-              strokeDasharray="6 8"
-              strokeLinecap="round"
-              opacity="0.55"
-            />
-            <path
-              ref={glowRef}
-              d={d}
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="18"
-              strokeLinecap="round"
-              opacity="0.22"
-              className="transition-colors duration-500"
-              style={{ strokeDasharray: "0 9999" }}
-            />
-            <path
-              ref={progRef}
-              d={d}
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="11"
-              strokeLinecap="round"
-              className="transition-colors duration-500"
-              style={{ strokeDasharray: "0 9999" }}
-            />
-
-            {/* Stations & Labels */}
-            {layout &&
-              layout.stops.map((s, k) => {
-                const on = k === safe;
-                const isHover = k === hovered;
-                const reached = k <= safe;
-                const lab = layout.labels[k];
-                const it = items[k];
-                const textCls = on
-                  ? "fill-foreground"
-                  : isHover
-                    ? "fill-foreground/85"
-                    : "fill-muted-foreground";
-
-                return (
-                  <g key={k} className="transition-opacity duration-300">
-                    {isHover && !on && (
-                      <circle cx={s.x} cy={s.y} r="22" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.35" />
-                    )}
-
-                    {on && !reduced && (
-                      <circle
-                        cx={s.x}
-                        cy={s.y}
-                        r="18"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        className="animate-ping"
-                        style={{ transformBox: "fill-box", transformOrigin: "center" }}
-                      />
-                    )}
-
-                    <circle
-                      cx={s.x}
-                      cy={s.y}
-                      r={on ? 15 : isHover ? 13 : 11}
-                      strokeWidth={on ? 6 : 4}
-                      className={cx(
-                        "fill-background transition-all duration-300",
-                        reached || isHover ? "stroke-current" : "stroke-border",
-                      )}
-                    />
-
-                    {on && <circle cx={s.x} cy={s.y} r="5" fill="currentColor" />}
-
-                    {portrait ? (
-                      <g className="transition-transform duration-200" transform={isHover && !on ? "translate(3 0)" : undefined}>
-                        <text x={lab.x} y={s.y - 3} fontSize="20" fontWeight="800" className={textCls}>
-                          {it.date}
-                        </text>
-                        <text x={lab.x} y={s.y + 18} fontSize="14.5" fontWeight={on ? 600 : 500} className={textCls}>
-                          {clip(it.title, 22)}
-                        </text>
-                      </g>
-                    ) : (
-                      <g
-                        className="transition-transform duration-200"
-                        transform={isHover && !on ? `translate(0 ${lab.side * 2})` : undefined}
-                      >
-                        <text
-                          x={lab.x}
-                          y={lab.side < 0 ? s.y - 56 : s.y + 50}
-                          textAnchor="middle"
-                          fontSize="23"
-                          fontWeight="800"
-                          className={textCls}
-                        >
-                          {it.date}
-                        </text>
-                        <text
-                          x={lab.x}
-                          y={lab.side < 0 ? s.y - 32 : s.y + 73}
-                          textAnchor="middle"
-                          fontSize="16"
-                          fontWeight={on ? 600 : 500}
-                          className={textCls}
-                        >
-                          {clip(it.title, 28)}
-                        </text>
-                      </g>
-                    )}
-                  </g>
-                );
-              })}
-
-            {/* Articulated Metro Train */}
-            {layout && (
-              <g>
-                <g ref={car2Ref}>
-                  <rect
-                    x="-15"
-                    y="-7.5"
-                    width="30"
-                    height="15"
-                    rx="6.5"
-                    className="stroke-background transition-colors duration-500"
-                    strokeWidth="2.5"
-                    paintOrder="stroke"
-                    fill="currentColor"
-                    opacity="0.85"
-                  />
-                  {[-7, 7].map((x) => (
-                    <rect key={x} x={x - 3} y="-2.5" width="6" height="5" rx="1.5" className="fill-background" opacity="0.9" />
-                  ))}
-                </g>
-
-                <g ref={car1Ref}>
-                  <polygon points="17,-4 54,-15 54,15 17,4" fill={`url(#${uid}-beam)`} />
-                  <rect x="-23" y="-2.5" width="8" height="5" rx="2" fill="currentColor" opacity="0.7" />
-                  <rect
-                    x="-18"
-                    y="-9"
-                    width="38"
-                    height="18"
-                    rx="9"
-                    className="stroke-background transition-colors duration-500"
-                    strokeWidth="3"
-                    paintOrder="stroke"
-                    fill="currentColor"
-                  />
-                  {[-8.5, 2].map((x) => (
-                    <rect key={x} x={x - 3} y="-3.5" width="7" height="7" rx="1.8" className="fill-background" />
-                  ))}
-                  <path d="M10 -4.5 C14.5 -4.5, 16 -2, 16 0 C16 2, 14.5 4.5, 10 4.5 Z" className="fill-background" />
-                </g>
-              </g>
-            )}
-          </svg>
-
-          {/* Interactive Checkpoint Click Targets */}
-          {layout &&
-            layout.stops.map((s, k) => (
-              <button
-                key={k}
-                type="button"
-                aria-label={`Inspect ${items[k].title}, ${items[k].date}`}
-                onClick={() => {
-                  setInspectIndex(k);
-                  selectStop(k);
-                }}
-                onMouseEnter={() => setHovered(k)}
-                onMouseLeave={() => setHovered(null)}
-                className="absolute size-14 -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                style={{ left: `${(s.x / geo.w) * 100}%`, top: `${(s.y / geo.h) * 100}%` }}
-              />
-            ))}
-
-          {/* FLOATING CORNER INSPECT CARD (Unobstructed & Clean) */}
-          {inspectIndex !== null && inspectItem && (
-            <div
-              ref={floatingRef}
-              className="absolute right-4 bottom-4 z-30 w-[320px] sm:w-[380px] overflow-hidden rounded-2xl border border-border/90 bg-card/95 text-card-foreground shadow-2xl backdrop-blur-md"
-            >
-              <div
-                className="h-1.5 w-full transition-colors duration-500"
-                style={{ backgroundColor: inspectItem.color }}
-              />
-
-              <div className="p-4 sm:p-5">
-                <div className="flex items-center gap-2">
-                  <span
-                    className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 font-bold text-white text-xs shadow-sm"
-                    style={{ backgroundColor: inspectItem.color }}
-                  >
-                    <span className="size-1.5 rounded-full bg-white" />
-                    {inspectItem.date}
-                  </span>
-                  <span className="rounded-full border border-border bg-muted/70 px-2.5 py-0.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                    {inspectItem.tag}
-                  </span>
-
-                  <button
-                    type="button"
-                    aria-label="Close card"
-                    onClick={() => setInspectIndex(null)}
-                    className="ml-auto inline-flex size-7 cursor-pointer items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="size-3.5">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M18 6 6 18M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-
-                <div className="mt-3 overflow-hidden rounded-xl bg-muted">
-                  <img
-                    src={inspectItem.image}
-                    alt=""
-                    draggable={false}
-                    className="aspect-[16/9] w-full object-cover"
-                  />
-                </div>
-
-                <h3 className="mt-3 text-lg font-bold tracking-tight">
-                  {inspectItem.title}
-                </h3>
-                <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground sm:text-sm">
-                  {inspectItem.description}
-                </p>
-
-                <div className="mt-4 flex items-center justify-between border-t border-border/60 pt-3">
-                  <span className="text-[11px] font-mono text-muted-foreground">
-                    Stop {inspectIndex + 1} of {n}
-                  </span>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      disabled={inspectIndex === 0}
-                      onClick={() => {
-                        const prev = inspectIndex - 1;
-                        setInspectIndex(prev);
-                        selectStop(prev);
-                      }}
-                      className="inline-flex size-8 cursor-pointer items-center justify-center rounded-full border border-border bg-background text-xs shadow-sm hover:bg-muted disabled:opacity-40"
-                      title="Previous"
-                    >
-                      ←
-                    </button>
-                    <button
-                      type="button"
-                      disabled={inspectIndex === n - 1}
-                      onClick={() => {
-                        const next = inspectIndex + 1;
-                        setInspectIndex(next);
-                        selectStop(next);
-                      }}
-                      className="inline-flex size-8 cursor-pointer items-center justify-center rounded-full border border-border bg-background text-xs shadow-sm hover:bg-muted disabled:opacity-40"
-                      title="Next"
-                    >
-                      →
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          <i className="ot-ln" />
+          <i className="ot-ac" />
         </div>
+      ))}
+
+      {data.map((y, i) => (
+        <button
+          key={`y${i}`}
+          type="button"
+          ref={(el) => { yearEls.current[i] = el; }}
+          className={["ot-year", i === activeYear ? "ot-on" : "", i >= shown ? "ot-hidden" : ""].join(" ")}
+          onMouseEnter={() => setHover(i)}
+          onMouseLeave={() => setHover(-1)}
+          onClick={(e) => { e.stopPropagation(); const first = flat.findIndex((f) => f.yi === i); if (first >= 0) select(first); }}
+        >
+          {y.year}
+        </button>
+      ))}
+
+      <i className="ot-emit" ref={(el) => { emitEls.current[0] = el; }} />
+      <i className="ot-emit ot-emit-2" ref={(el) => { emitEls.current[1] = el; }} />
+      <i className="ot-emit ot-emit-3" ref={(el) => { emitEls.current[2] = el; }} />
+      <div className="ot-core" ref={core} aria-hidden="true">
+        <div className="ot-core-fill">
+          <div className="ot-blob ot-b1" />
+          <div className="ot-blob ot-b2" />
+          <div className="ot-blob ot-b3" />
+          <div className="ot-blob ot-b4" />
+        </div>
+        <div className="ot-core-gloss" />
+        <div className="ot-core-shine" />
       </div>
+
+      {flat.map((f, i) => {
+        const y = data[f.yi], ev = y.events[f.ei];
+        return (
+          <button
+            key={`n${i}`}
+            type="button"
+            ref={(el) => { nodeEls.current[i] = el; }}
+            aria-label={`${ev.title}, ${ev.date ? ev.date + " " : ""}${y.year}`}
+            aria-pressed={i === sel}
+            className={["ot-node", f.yi === activeYear ? "ot-on" : "", i === sel ? "ot-sel" : "", f.yi >= nodesShown ? "ot-hidden" : ""].join(" ")}
+            onMouseEnter={() => setHover(f.yi)}
+            onMouseLeave={() => setHover(-1)}
+            onClick={(e) => { e.stopPropagation(); select(sel === i ? -1 : i); }}
+          >
+            {ev.icon ?? <span className="ot-dot" />}
+          </button>
+        );
+      })}
+
+      <div
+        ref={card}
+        role="dialog"
+        aria-live="polite"
+        aria-hidden={!curEvent}
+        className={["ot-card", curEvent ? "ot-open" : ""].join(" ")}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {curEvent && curYear && (
+          <>
+            <div className="ot-card-meta">
+              <span>{curEvent.date ? `${curEvent.date} ${curYear.year}` : curYear.year}</span>
+              <span>{pad(sel + 1)} / {pad(flat.length)}</span>
+            </div>
+            <h4 className="ot-card-title">{curEvent.title}</h4>
+            {curEvent.description && <p className="ot-card-text">{curEvent.description}</p>}
+            <div className="ot-card-nav">
+              <button type="button" onClick={() => step(-1)}>← Prev</button>
+              <button type="button" onClick={() => step(1)}>Next →</button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* --------------------------------- Journey --------------------------------- */
+
+export default function Journey({
+  journey = DEFAULT_JOURNEY,
+  theme = "auto", // "auto" follows your site's .dark class; or force "dark" | "light"
+  speed = 1,
+  direction = "alternate",
+  height = "min(86vh, 760px)",
+  className,
+}) {
+  const data = React.useMemo(() => groupByYear(journey), [journey]);
+  if (data.length === 0) return null;
+
+  return (
+    <div className={["w-full", className].filter(Boolean).join(" ")} style={{ height }}>
+      <OrbitTimeline data={data} theme={theme} speed={speed} direction={direction} showYears />
     </div>
   );
 }
